@@ -1,0 +1,37 @@
+
+canvas,video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+header {
+    width: 100%;
+    
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+}
+footer {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+
+}
+#setting{
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 3;
+    background-color: aliceblue;
+}
