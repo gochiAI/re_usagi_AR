@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .accordion {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .accordion-item {
+            margin-bottom: 10px;
+        }
+
+        .accordion-item .accordion-header {
+            cursor: pointer;
+            background-color: lightgray;
+            padding: 10px;
+        }
+
+        .accordion-item .accordion-content {
+            display: block;
+            padding: 10px;
+            max-height: 1000px; 
+        }
+
+    </style>
+</head>
+<body>
+    <div id="help">
+        <button type="button" id="button_help_close"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M6.4 19L5 17.6l5.6-5.6L5 6.4L6.4 5l5.6 5.6L17.6 5L19 6.4L13.4 12l5.6 5.6l-1.4 1.4l-5.6-5.6z" />
+        </svg></button>
+    <div id="help_content">
+    <div class="accordion">
+        <div class="accordion-item">
+            <div class="accordion-header">このserviceはなんですか?</div>
+            <div class="accordion-content">
+                どこでもキャラクターと一緒に写真を撮ることができるサービスです。
+            </div>
+        </div>
+        <div class="accordion-item">
+            <div class="accordion-header">使い方がよくわかりません</div>
+            <div class="accordion-content">
+                次のボタンを押してガイドを受けてください。
+            </div>
+        </div>
+        <div class="accordion-item">
+            <div class="accordion-header">動きません。</div>
+            <div class="accordion-content">
+                端末やブラウザについての情報を教えてください。
+                以下のフォームにお問い合わせを。
+                またこのserviceはスマートフォンでの利用を推奨しています。
+            </div>
+        </div>
+        <div class="accordion-item">
+            <div class="accordion-header">あなたは誰？</div>
+            <div class="accordion-content">
+                私はただのファンです。
+                各種SNSはこちら
+
+            </div>
+        </div>
+        <div class="accordion-item">
+            <div class="accordion-header">このserviceの詳細</div>
+            <div class="accordion-content">
+                利用料金: 無料
+                推奨端末: スマートフォン
+                利用想定ブラウザ: Chrome, Safari
+                バージョン: 3.0.0
+            </div>
+    </div>
+    </div>
+</div>
+</body>
+</html>

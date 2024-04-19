@@ -7,9 +7,6 @@ canvas,video {
 }
 header {
     width: 100%;
-    
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
 
     position: absolute;
     top: 0;
@@ -19,8 +16,6 @@ header {
 footer {
     width: 100%;
 
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
 
     position: absolute;
     bottom: 0;
@@ -28,10 +23,103 @@ footer {
     z-index: 2;
 
 }
+svg{
+    height: 1em;
+    width: 1em;
+}
 #setting{
     position: absolute;
     top: 0;
     left: 0;
     z-index: 3;
     background-color: aliceblue;
+}
+
+#help{
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    -ms-overflow-style: none;
+    overflow-y: scroll;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 3;
+    background-color: aliceblue;
+}
+#help::-webkit-scrollbar{
+    display:none;
+  }
+#help_content{
+    position: relative;
+    margin: 50px;
+    z-index: 3;
+    background-color: aliceblue;
+}
+#service_logo{
+    position: absolute;
+    height: 50px;
+    padding: 4px;
+    top: 0;
+    /*常に画面の中央に配置*/
+    left: 50%;
+    transform: translateX(-50%);
+
+}
+
+/* Button Postison */
+#button_setting{
+    position: absolute;
+    max-width: calc(100vw - 80px);
+    padding: 4px;
+    top: 10px;
+    left: 10px;
+
+}
+
+#button_help{
+    position: absolute;
+    max-width: calc(100vw - 80px);
+    padding: 4px;
+    top: 10px;
+    right: 10px;
+}
+
+#button_setting_close{
+    position: absolute;
+    max-width: calc(100vw - 80px);
+    padding: 4px;
+    top: 10px;
+    left: 10px;
+}
+#button_help_close{
+    position: absolute;
+    max-width: calc(100vw - 80px);
+    padding: 4px;
+    top: 10px;
+    right: 10px;
+}
+#button_edit{
+    position: absolute;
+    max-width: calc(100vw - 80px);
+    padding: 4px;
+    bottom: 10px;
+    left: 10px;
+}
+
+#button_camera{
+    position: absolute;
+    max-width: calc(100vw - 80px);
+    padding: 4px;
+    bottom: 10px;
+    left: 50%;
+    right: auto;
+}
+
+#button_fip{
+    position: absolute;
+    max-width: calc(100vw - 80px);
+    padding: 4px;
+    bottom: 10px;
+    right: 10px;
 }
