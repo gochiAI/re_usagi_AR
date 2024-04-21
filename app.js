@@ -2,13 +2,8 @@
 var main = document.getElementById('main');
 var canvas = document.createElement('canvas');
 var video = document.createElement('video');
-async function addBA(id,func){
-    await document.getElementById(id).addEventListener('click',function(){
-        func();
-    });
-}
-addBA('button_setting',()=>{fetch_page('start.html');});
-addBA('button_help',()=>{fetch_page('help.html');});
+
+
 class set_cAv {
     constructor() {
         this.canvas = canvas;

@@ -116,7 +116,7 @@ svg{
     right: auto;
 }
 
-#button_fip{
+#button_flip{
     position: absolute;
     max-width: calc(100vw - 80px);
     padding: 4px;
