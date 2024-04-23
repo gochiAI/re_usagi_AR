@@ -1,0 +1,73 @@
+<div id="edit_tab">
+  <button>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+    >
+      <path
+        fill="currentColor"
+        d="M15 14c-2.67 0-8 1.33-8 4v2h16v-2c0-2.67-5.33-4-8-4m-9-4V7H4v3H1v2h3v3h2v-3h3v-2m6 2a4 4 0 0 0 4-4a4 4 0 0 0-4-4a4 4 0 0 0-4 4a4 4 0 0 0 4 4"
+      />
+    </svg>
+  </button>
+
+  <div id="tab_sprite"></div>
+</div>
+<style>
+  #tab_sprite {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  #tab_sprite button {
+    width: 40px;
+    height: 40px;
+    margin: 2px;
+    padding: 2px;
+    border: 1px solid transparent;
+  }
+  #tab_sprite button.selected {
+    border-color: blue; /* 選択されたボタンを強調表示 */
+  }
+  #tab_sprite img {
+    object-fit: contain;
+    width: 100%;
+    height: 100%;
+  }
+</style>
+<script>
+  function createButtonWithImage(imagePath, sprite_name) {
+    return `
+        <button onclick="editSprite(this,'${sprite_name}')">
+            <img id="spriteImage" src="${imagePath}" alt="sprite" />
+        </button>
+    `;
+  }
+  function editSprite(button, sprite_name) {
+    if (button.classList.contains("selected")) {
+      button.classList.remove("selected");
+      console.log("Unselected Sprite:", sprite_name);
+    } else {
+      document.querySelectorAll("#tab_sprite button").forEach((btn) => {
+        btn.classList.remove("selected");
+      });
+      button.classList.add("selected");
+      console.log("Selected Sprite:", sprite_name);
+    }
+  }
+  var sprite_list = [
+    {
+      path: "https://raw.githubusercontent.com/gochiAI/usagi_AR/main/aws.gochiusa.com/img/ekimemo/chino_angry_thumb.png",
+      name: "chino_angry",
+    },
+    { path: "", name: "" },
+  ];
+  sprite_list.forEach((sprite) => {
+    document.getElementById("tab_sprite").innerHTML += createButtonWithImage(
+      sprite.path,
+      sprite.name
+    );
+  });
+</script>
