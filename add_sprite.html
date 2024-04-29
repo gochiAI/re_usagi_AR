@@ -1,0 +1,108 @@
+<div style="display: flex;justify-content: space-around;">
+</div>
+<script>
+    // リストデータを取得します
+    let listData = [{ imagePath: "https://via.placeholder.com/150", sprite_name: "sprite1" }, { imagePath: "https://via.placeholder.com/150", sprite_name: "sprite2" }];
+
+    // 親div要素を取得します
+    let parentDiv = document.querySelector('div');
+
+    // リストデータをループします
+    for (let i = 0; i < listData.length; i++) {
+        // 新しいdiv要素を作成します
+        let newDiv = document.createElement('div');
+
+
+        // 作成したdiv要素に"SpriteCard"というクラスを追加します
+        newDiv.classList.add("SpriteCard");
+        newDiv.style.position = 'relative';
+        let img = document.createElement('img');
+        img.src = listData[i].imagePath;
+        newDiv.appendChild(img);
+        let CardButtons = document.createElement('div');
+        CardButtons.id = "CardButtons";
+        let imgZoom_Button = document.createElement('button');
+        imgZoom_Button.onclick = function () {
+            imgZoom_Button.onclick = function () {
+                // 新しいモーダルを作成します
+                let modal = document.createElement('div');
+                modal.class
+
+                // モーダル内に表示する画像を作成します
+                let img = document.createElement('img');
+                img.src = listData[i].imagePath; // 画像のパスを設定します
+                //画像を真ん中に表示するためのスタイルを設定します
+                modal.appendChild(img);
+
+                // モーダルを閉じるボタンを作成します
+                let closeButton = document.createElement('button');
+                closeButton.textContent = '閉じる';
+                closeButton.onclick = function () {
+                    modal.style.display = 'none';
+                };
+                modal.appendChild(closeButton);
+
+                // モーダル外をクリックしたときにモーダルを閉じます
+                modal.onclick = function (event) {
+                    if (event.target == modal) {
+                        modal.style.display = 'none';
+                    }
+                };
+
+                // モーダルを表示します
+                modal.style.display = 'block';
+
+                // モーダルをbody要素に追加します
+                document.body.appendChild(modal);
+            };
+        };
+        let selectSprite_Button = document.createElement('button');
+        selectSprite_Button.onclick = function () {
+            //選択/非選択の切り替えをボタンを押すごとに行う
+            //選択されているときにはSpriteCardにselectedクラスを追加
+            if (selectSprite_Button.classList.contains("selected")) {
+                selectSprite_Button.classList.remove("selected");
+                console.log("Unselected Sprite:", sprite_name);
+            } else {
+                selectSprite_Button.classList.add("selected");
+                console.log("Selected Sprite:", sprite_name);
+            }
+
+        };
+        // 作成したdiv要素を親div要素に追加します
+        CardButtons.appendChild(imgZoom_Button);
+        CardButtons.appendChild(selectSprite_Button);
+        newDiv.appendChild(CardButtons);
+
+        parentDiv.appendChild(newDiv);
+    }
+</script>
+<style>
+    .SpriteCard {
+        border: 1px solid #000;
+        width: 150px;
+        height: 150px;
+        margin: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+    }
+
+    .SpriteCard.selected{
+        background-color: blue;
+    }
+    .SpriteCard img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    #CardButtons {
+        position: absolute;
+        bottom: 10px;
+    }
+    #CardButtons button {
+        margin: 0px 5px;
+    }
+</style>

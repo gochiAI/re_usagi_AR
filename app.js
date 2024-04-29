@@ -37,8 +37,8 @@ class set_cAv {
 
 }
 
-class chara_sprite{
-    constructor(){
+class chara_sprite {
+    constructor() {
         this.x = 0;
         this.y = 0;
         this.width = 0;
@@ -46,7 +46,7 @@ class chara_sprite{
         this.src = '';
         this.sprite_name = '';
     }
-    set_chara_sprite(x,y,width,height,src,sprite_name){
+    set_chara_sprite(x, y, width, height, src, sprite_name) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -54,12 +54,12 @@ class chara_sprite{
         this.src = src;
         this.sprite_name = sprite_name;
     }
-    load_chara_config(sprite_name){
-        datum=localStorage.getItem("sprites_config");
+    load_chara_config(sprite_name) {
+        datum = localStorage.getItem("sprites_config");
         this.sprite_name = sprite_name;
-        if(datum){
-            datum=JSON.parse(datum);
-            if(datum[this.sprite_name]){
+        if (datum) {
+            datum = JSON.parse(datum);
+            if (datum[this.sprite_name]) {
                 this.x = datum[this.sprite_name].x;
                 this.y = datum[this.sprite_name].y;
                 this.width = datum[this.sprite_name].width;
@@ -70,12 +70,12 @@ class chara_sprite{
     }
 }
 
-function fetch_page(url){
+function fetch_page(url) {
     fetch(url)
-    .then(response => response.text())
-    .then(data => {
-        main.innerHTML = data;
-    });
+        .then(response => response.text())
+        .then(data => {
+            main.innerHTML = data;
+        });
 
 }
 set_cAv = new set_cAv();

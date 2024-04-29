@@ -7,8 +7,71 @@
 </head>
 
 <body>
+    <div id="help">
+        <button type="button" id="button_help_close"
+            onclick="document.getElementById('help').classList.remove('show');"><svg xmlns="http://www.w3.org/2000/svg"
+                width="1em" height="1em" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                    d="M6.4 19L5 17.6l5.6-5.6L5 6.4L6.4 5l5.6 5.6L17.6 5L19 6.4L13.4 12l5.6 5.6l-1.4 1.4l-5.6-5.6z" />
+            </svg></button>
+        <div id="help_content">
+            <div class="accordion">
+                <div class="accordion-item">
+                    <div class="accordion-header">このserviceはなんですか?</div>
+                    <div class="accordion-content">
+                        どこでもキャラクターと一緒に写真を撮ることができるサービスです。
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <div class="accordion-header">使い方がよくわかりません</div>
+                    <div class="accordion-content">
+                        次のボタンを押してガイドを受けてください。
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <div class="accordion-header">動きません。</div>
+                    <div class="accordion-content">
+                        端末やブラウザについての情報を教えてください。
+                        以下のフォームにお問い合わせを。
+                        またこのserviceはスマートフォンでの利用を推奨しています。
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <div class="accordion-header">あなたは誰？</div>
+                    <div class="accordion-content">
+                        私はただのファンです。
+                        各種SNSはこちら
+                        <a href="https://twitter.com/gochi_AI"><svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+                                width="100" height="100" viewBox="0 0 50 50">
+                                <path
+                                    d="M 11 4 C 7.134 4 4 7.134 4 11 L 4 39 C 4 42.866 7.134 46 11 46 L 39 46 C 42.866 46 46 42.866 46 39 L 46 11 C 46 7.134 42.866 4 39 4 L 11 4 z M 13.085938 13 L 21.023438 13 L 26.660156 21.009766 L 33.5 13 L 36 13 L 27.789062 22.613281 L 37.914062 37 L 29.978516 37 L 23.4375 27.707031 L 15.5 37 L 13 37 L 22.308594 26.103516 L 13.085938 13 z M 16.914062 15 L 31.021484 35 L 34.085938 35 L 19.978516 15 L 16.914062 15 z">
+                                </path>
+                            </svg></a>
+                        <a href="https://github.com/gochiAI">
+                            <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="100" height="100"
+                                viewBox="0 0 50 50">
+                                <path
+                                    d="M17.791,46.836C18.502,46.53,19,45.823,19,45v-5.4c0-0.197,0.016-0.402,0.041-0.61C19.027,38.994,19.014,38.997,19,39 c0,0-3,0-3.6,0c-1.5,0-2.8-0.6-3.4-1.8c-0.7-1.3-1-3.5-2.8-4.7C8.9,32.3,9.1,32,9.7,32c0.6,0.1,1.9,0.9,2.7,2c0.9,1.1,1.8,2,3.4,2 c2.487,0,3.82-0.125,4.622-0.555C21.356,34.056,22.649,33,24,33v-0.025c-5.668-0.182-9.289-2.066-10.975-4.975 c-3.665,0.042-6.856,0.405-8.677,0.707c-0.058-0.327-0.108-0.656-0.151-0.987c1.797-0.296,4.843-0.647,8.345-0.714 c-0.112-0.276-0.209-0.559-0.291-0.849c-3.511-0.178-6.541-0.039-8.187,0.097c-0.02-0.332-0.047-0.663-0.051-0.999 c1.649-0.135,4.597-0.27,8.018-0.111c-0.079-0.5-0.13-1.011-0.13-1.543c0-1.7,0.6-3.5,1.7-5c-0.5-1.7-1.2-5.3,0.2-6.6 c2.7,0,4.6,1.3,5.5,2.1C21,13.4,22.9,13,25,13s4,0.4,5.6,1.1c0.9-0.8,2.8-2.1,5.5-2.1c1.5,1.4,0.7,5,0.2,6.6c1.1,1.5,1.7,3.2,1.6,5 c0,0.484-0.045,0.951-0.11,1.409c3.499-0.172,6.527-0.034,8.204,0.102c-0.002,0.337-0.033,0.666-0.051,0.999 c-1.671-0.138-4.775-0.28-8.359-0.089c-0.089,0.336-0.197,0.663-0.325,0.98c3.546,0.046,6.665,0.389,8.548,0.689 c-0.043,0.332-0.093,0.661-0.151,0.987c-1.912-0.306-5.171-0.664-8.879-0.682C35.112,30.873,31.557,32.75,26,32.969V33 c2.6,0,5,3.9,5,6.6V45c0,0.823,0.498,1.53,1.209,1.836C41.37,43.804,48,35.164,48,25C48,12.318,37.683,2,25,2S2,12.318,2,25 C2,35.164,8.63,43.804,17.791,46.836z">
+                                </path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <div class="accordion-header">このserviceの詳細</div>
+                    <div class="accordion-content">
+                        利用料金: 無料
+                        推奨端末: スマートフォン
+                        利用想定ブラウザ: Chrome, Safari
+                        バージョン: 3.0.0
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <header>
-        <img src="./usagi_AR.svg" id="service_logo" /><button type="button" id="button_help">
+        <img src="./usagi_AR.svg" id="service_logo" /><button type="button" id="button_help"
+            onclick="document.getElementById('help').classList.add('show');">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                 <path fill="currentColor"
                     d="M11.95 18q.525 0 .888-.363t.362-.887t-.362-.888t-.888-.362t-.887.363t-.363.887t.363.888t.887.362m-.9-3.85h1.85q0-.825.188-1.3t1.062-1.3q.65-.65 1.025-1.238T15.55 8.9q0-1.4-1.025-2.15T12.1 6q-1.425 0-2.312.75T8.55 8.55l1.65.65q.125-.45.563-.975T12.1 7.7q.8 0 1.2.438t.4.962q0 .5-.3.938t-.75.812q-1.1.975-1.35 1.475t-.25 1.825M12 22q-2.075 0-3.9-.787t-3.175-2.138T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22">
@@ -18,6 +81,14 @@
     </header>
 
     <div id="main">
+    </div>
+    <div id="edit_tab">
+        <div id="tab_sprite"><button id="button_add" onclick="add_sprite()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                    <path fill="currentColor"
+                        d="M15 14c-2.67 0-8 1.33-8 4v2h16v-2c0-2.67-5.33-4-8-4m-9-4V7H4v3H1v2h3v3h2v-3h3v-2m6 2a4 4 0 0 0 4-4a4 4 0 0 0-4-4a4 4 0 0 0-4 4a4 4 0 0 0 4 4" />
+                </svg>
+            </button></div>
     </div>
     <footer>
         <button type="button" id="button_edit"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em"
@@ -43,20 +114,47 @@
 </body>
 <script type="module" src="./app.js"></script>
 <script>
-    document.getElementById('button_help').addEventListener('click', function() {
-        fetch('./help.html')
-            .then(response => response.text())
-            .then(text => {
-                document.getElementById('main').innerHTML = text;
-                document.getElementById('button_help_close').addEventListener('click', function() {
-                    document.getElementById('main').innerHTML = '';
-                });
+
+    document.getElementById('button_edit').addEventListener('click', function () {
+        var editTab = document.getElementById('edit_tab');
+        if (editTab.classList.contains('show')) {
+            editTab.classList.remove('show');
+        } else {
+            editTab.classList.add('show');
+        }
+    });
+    function createButtonWithImage(imagePath, sprite_name) {
+        return `
+        <button onclick="editSprite(this,'${sprite_name}')">
+            <img id="spriteImage" src="${imagePath}" alt="sprite" />
+        </button>
+    `;
+    }
+    function editSprite(button, sprite_name) {
+        if (button.classList.contains("selected")) {
+            button.classList.remove("selected");
+            console.log("Unselected Sprite:", sprite_name);
+        } else {
+            document.querySelectorAll("#tab_sprite button").forEach((btn) => {
+                btn.classList.remove("selected");
             });
+            button.classList.add("selected");
+            console.log("Selected Sprite:", sprite_name);
+        }
+    }
+    var sprite_list = [
+        {
+            path: "https://raw.githubusercontent.com/gochiAI/usagi_AR/main/aws.gochiusa.com/img/ekimemo/chino_angry_thumb.png",
+            name: "chino_angry",
+        },
+        { path: "", name: "" },
+    ];
+    sprite_list.forEach((sprite) => {
+        document.getElementById("tab_sprite").innerHTML += createButtonWithImage(
+            sprite.path,
+            sprite.name
+        );
     });
-    document.getElementById('button_edit').addEventListener('click', function() {
-        
-
-    });
-
 </script>
+
 </html>
