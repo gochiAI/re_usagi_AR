@@ -36,7 +36,7 @@ footer {
   left: 0;
   z-index: 2;
 }
-svg {
+button>img {
   height: 1em;
   width: 1em;
 }

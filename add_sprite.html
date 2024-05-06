@@ -1,85 +1,168 @@
-<div style="display: flex;justify-content: space-around;">
+<div id="filter_buttons">
+    <!--  プルダウンメニュー 1:ekimemo,2:alarm,3:lessar,0:all  -->
+    <select id="Event_filter">
+        <option value="ev-0">全て</option>
+        <option value="ev-ekimemo">ekimemo</option>
+        <option value="ev-alarm">alarm</option>
+        <option value="ev-lessar">lessar</option>
+    </select>
+    <!--　プルダウンメニュー　-->
+    <select id="Character_filter">
+        <option value="ch-0">全て</option>
+        <option value="ch-chino">chino</option>
+        <option value="ch-cocoa">cocoa</option>
+        <option value="ch-rize">rize</option>
+        <option value="ch-chiya">chiya</option>
+        <option value="ch-syaro">syaro</option>
+        <option value="ch-maya">maya</option>
+        <option value="ch-megu">megu</option>
+        <option value="ch-fuyu">fuyu</option>
+    </select>
 </div>
+
+<div id="Sprites_List">
+</div>
+<button id="close_add_sprite">閉じる</button>
 <script>
     // リストデータを取得します
-    let listData = [{ imagePath: "https://via.placeholder.com/150", sprite_name: "sprite1" }, { imagePath: "https://via.placeholder.com/150", sprite_name: "sprite2" }];
+    var CharacterDatas = ["alarm/chino_0", "alarm/chiya_0", "alarm/cocoa_0", "alarm/rize_0", "alarm/syaro_0",
+        "lessar/chino_0", "lessar/chiya_0", "lessar/cocoa_0", "lessar/rize_0", "lessar/syaro_0", "lessar/maya_0", "lessar/megu_0", "lessar/fuyu_0",
+        "ekimemo/chino_usual", "ekimemo/chino_smile", "ekimemo/chino_angry", "ekimemo/chino_dovey", "ekimemo/chino_tired",
+        "ekimemo/chiya_usual", "ekimemo/chiya_smile", "ekimemo/chiya_angry", "ekimemo/chiya_dovey", "ekimemo/chiya_tired",
+        "ekimemo/cocoa_usual", "ekimemo/cocoa_smile", "ekimemo/cocoa_angry", "ekimemo/cocoa_dovey", "ekimemo/cocoa_tired",
+        "ekimemo/rize_usual", "ekimemo/rize_smile", "ekimemo/rize_angry", "ekimemo/rize_dovey", "ekimemo/rize_tired",
+        "ekimemo/syaro_usual", "ekimemo/syaro_smile", "ekimemo/syaro_angry", "ekimemo/syaro_dovey", "ekimemo/syaro_tired",
+        "ekimemo/maya_usual", "ekimemo/maya_smile", "ekimemo/maya_angry", "ekimemo/maya_dovey", "ekimemo/maya_tired",
+        "ekimemo/megu_usual", "ekimemo/megu_smile", "ekimemo/megu_angry", "ekimemo/megu_dovey", "ekimemo/megu_tired",
+    ];
 
     // 親div要素を取得します
-    let parentDiv = document.querySelector('div');
+    let parentDiv = document.querySelector('#Sprites_List');
+    var eventFilter = document.getElementById('Event_filter');
+    var characterFilter = document.getElementById('Character_filter');
 
-    // リストデータをループします
-    for (let i = 0; i < listData.length; i++) {
-        // 新しいdiv要素を作成します
-        let newDiv = document.createElement('div');
+    // プルダウンメニューのchangeイベントにリスナーを追加
+    eventFilter.addEventListener('change', filterList);
+    characterFilter.addEventListener('change', filterList);
 
-
-        // 作成したdiv要素に"SpriteCard"というクラスを追加します
-        newDiv.classList.add("SpriteCard");
-        newDiv.style.position = 'relative';
-        let img = document.createElement('img');
-        img.src = listData[i].imagePath;
-        newDiv.appendChild(img);
-        let CardButtons = document.createElement('div');
-        CardButtons.id = "CardButtons";
-        let imgZoom_Button = document.createElement('button');
-        imgZoom_Button.onclick = function () {
-            imgZoom_Button.onclick = function () {
-                // 新しいモーダルを作成します
-                let modal = document.createElement('div');
-                modal.class
-
-                // モーダル内に表示する画像を作成します
-                let img = document.createElement('img');
-                img.src = listData[i].imagePath; // 画像のパスを設定します
-                //画像を真ん中に表示するためのスタイルを設定します
-                modal.appendChild(img);
-
-                // モーダルを閉じるボタンを作成します
-                let closeButton = document.createElement('button');
-                closeButton.textContent = '閉じる';
-                closeButton.onclick = function () {
-                    modal.style.display = 'none';
-                };
-                modal.appendChild(closeButton);
-
-                // モーダル外をクリックしたときにモーダルを閉じます
-                modal.onclick = function (event) {
-                    if (event.target == modal) {
-                        modal.style.display = 'none';
-                    }
-                };
-
-                // モーダルを表示します
-                modal.style.display = 'block';
-
-                // モーダルをbody要素に追加します
-                document.body.appendChild(modal);
-            };
-        };
-        let selectSprite_Button = document.createElement('button');
-        selectSprite_Button.onclick = function () {
-            //選択/非選択の切り替えをボタンを押すごとに行う
-            //選択されているときにはSpriteCardにselectedクラスを追加
-            if (selectSprite_Button.classList.contains("selected")) {
-                selectSprite_Button.classList.remove("selected");
-                console.log("Unselected Sprite:", sprite_name);
-            } else {
-                selectSprite_Button.classList.add("selected");
-                console.log("Selected Sprite:", sprite_name);
-            }
-
-        };
-        // 作成したdiv要素を親div要素に追加します
-        CardButtons.appendChild(imgZoom_Button);
-        CardButtons.appendChild(selectSprite_Button);
-        newDiv.appendChild(CardButtons);
-
-        parentDiv.appendChild(newDiv);
+    var get_img_src = function (sprite_name) {
+        // sprite_nameが*/0で終わっている場合は/0を.pngに置換する
+        if (sprite_name.endsWith("_0")) {
+            sprite_name = sprite_name.replace("_0", ".png");
+        } else {
+            // 二番目のスラッシュをアンダーバーに置換する
+            sprite_name = sprite_name + '.png';
+        }
+        return sprite_name;
     }
+    //selectデータの変更時にリストを再描画する
+    function filterList() {
+        // 選択されたオプションの値を取得
+        var selectedEvent = eventFilter.value;
+        var selectedCharacter = characterFilter.value;
+        // Sprites_Listの子要素を全て削除
+        while (parentDiv.firstChild) {
+            parentDiv.removeChild(parentDiv.firstChild);
+        }
+        // フィルター値に応じてリストを再作成
+        var filterList = CharacterDatas.filter(
+            function (sprite_name) {
+                //両方とも0,0なら何もしない
+                if (selectedEvent == "ev-0" && selectedCharacter == "ch-0") {
+                    return true;
+                }
+                //それ以外の場合は-以降の文字列を取得
+                else {
+                    let event = selectedEvent.split('-')[1];
+                    let character = selectedCharacter.split('-')[1];
+
+                    //イベントが0以外の場合はイベントが一致するものだけを表示
+                    if (event != "0" && character == "0") {
+
+                        return sprite_name.includes(event);
+                    }
+                    //キャラクターが0以外の場合はキャラクターが一致するものだけを表示
+                    else if (event == "0" && character != "0") {
+                        return sprite_name.includes(character);
+                    }
+                    //両方とも0以外の場合は両方が一致するものだけを表示
+                    else {
+                        return sprite_name.includes(event) && sprite_name.includes(character);
+                    }
+                }
+            });
+        displayCh(filterList);
+    }
+
+    function displayCh(CharacterDatas) {
+        for (let i = 0; i < CharacterDatas.length; i++) {
+            // 新しいdiv要素を作成します
+            let newDiv = document.createElement('div');
+
+
+            // 作成したdiv要素に"SpriteCard"というクラスを追加します
+            newDiv.classList.add("SpriteCard");
+            let img = document.createElement('img');
+            img.src = "./core_sys/img/thumb_sprites/" + get_img_src(CharacterDatas[i]);
+            let sprite_name = CharacterDatas[i];
+            newDiv.appendChild(img);
+            let CardButtons = document.createElement('div');
+            CardButtons.id = "CardButtons";
+            let imgZoom_Button = document.createElement('button');
+            let imgZoom_icon = document.createElement('img');
+            imgZoom_icon.src = "./core_sys/img/ui/img_zoom.svg";
+            imgZoom_Button.appendChild(imgZoom_icon)
+            imgZoom_Button.onclick = function () {
+                let Img_Modal = document.createElement('div');
+                Img_Modal.id = "Img_Modal";
+
+                Img_Modal.onclick = function () {
+                    //Img_Modalを削除
+                    Img_Modal.remove();
+                };
+
+                let img = document.createElement('img');
+                img.src = "./core_sys/img/stand_sprites/" + get_img_src(CharacterDatas[i]);
+                Img_Modal.appendChild(img);
+                document.body.appendChild(Img_Modal);
+
+            };
+
+            let selectSprite_Button = document.createElement('button');
+            let selectSprite_icon = document.createElement('img');
+            selectSprite_icon.src = "./core_sys/img/ui/user_add.svg";
+            selectSprite_Button.appendChild(selectSprite_icon);
+            selectSprite_Button.onclick = function () {
+                //選択/非選択の切り替えをボタンを押すごとに行う
+                //選択されているときには親の親のdiv要素にselectedクラスを追加する
+                if (newDiv.classList.contains('selected')) {
+                    selectSprite_icon.src = "./core_sys/img/ui/user_add.svg";
+                    newDiv.classList.remove('selected');
+                } else {
+                    selectSprite_icon.src = "./core_sys/img/ui/user_remove.svg";
+                    newDiv.classList.add('selected');
+                }
+
+            };
+            // 作成したdiv要素を親div要素に追加します
+            CardButtons.appendChild(imgZoom_Button);
+            CardButtons.appendChild(selectSprite_Button);
+            newDiv.appendChild(CardButtons);
+
+            parentDiv.appendChild(newDiv);
+        }
+    }
+    displayCh(CharacterDatas);
 </script>
 <style>
+    #Sprites_List {
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap
+    }
+
     .SpriteCard {
-        border: 1px solid #000;
+        border: 4px solid #000;
         width: 150px;
         height: 150px;
         margin: 10px;
@@ -89,20 +172,47 @@
         position: relative;
     }
 
-    .SpriteCard.selected{
-        background-color: blue;
+    .SpriteCard.selected {
+        border: 4px dashed blue;
     }
+
     .SpriteCard img {
-        width: 100%;
-        height: 100%;
+        width: 80%;
+        height: 80%;
         object-fit: cover;
+    }
+
+    #close_add_sprite {
+        /*画面中央*/
+        position: fixed;
+        left: 50%;
+
     }
 
     #CardButtons {
         position: absolute;
-        bottom: 10px;
+        bottom: 5px;
     }
+
     #CardButtons button {
         margin: 0px 5px;
+    }
+
+    #Img_Modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.5);
+        display: flex;
+
+        justify-content: center;
+        align-items: center;
+    }
+
+    #Img_Modal img {
+        width: auto;
+        height: 80%;
     }
 </style>
