@@ -18,12 +18,43 @@
         <option value="ch-megu">megu</option>
         <option value="ch-fuyu">fuyu</option>
     </select>
+    <button class="close_add_sprite">閉じる</button>
 </div>
+
 
 <div id="Sprites_List">
 </div>
-<button id="close_add_sprite">閉じる</button>
+<button class="close_add_sprite">閉じる</button>
 <script>
+    class LocalStorageUtility {
+        //一つのローカルストレージにすべてのデータを保存する
+        //データはJSON形式で保存されるため、JSON.parse()で取り出す
+        getStorage = function () {
+            return JSON.parse(localStorage.getItem('sprites_config')) || {};
+        }
+        setStorage = function (data) {
+            localStorage.setItem('sprites_config', JSON.stringify(data));
+        }
+
+        //データを保存する
+        saveData(key, value) {
+            let data = this.getStorage();
+            //setdefaultのような動きをする
+            data[key]=value;
+            this.setStorage(data);
+        }
+        //データを取得する
+        getData(key) {
+            let data = this.getStorage();
+            return data[key];
+        }
+        //データを削除する
+        removeData(key){
+            let data = this.getStorage();
+            delete data[key];
+            this.setStorage(data);
+        }
+    }
     // リストデータを取得します
     var CharacterDatas = ["alarm/chino_0", "alarm/chiya_0", "alarm/cocoa_0", "alarm/rize_0", "alarm/syaro_0",
         "lessar/chino_0", "lessar/chiya_0", "lessar/cocoa_0", "lessar/rize_0", "lessar/syaro_0", "lessar/maya_0", "lessar/megu_0", "lessar/fuyu_0",
@@ -35,6 +66,8 @@
         "ekimemo/maya_usual", "ekimemo/maya_smile", "ekimemo/maya_angry", "ekimemo/maya_dovey", "ekimemo/maya_tired",
         "ekimemo/megu_usual", "ekimemo/megu_smile", "ekimemo/megu_angry", "ekimemo/megu_dovey", "ekimemo/megu_tired",
     ];
+
+    var CopilotLS = new LocalStorageUtility();
 
     // 親div要素を取得します
     let parentDiv = document.querySelector('#Sprites_List');
@@ -132,14 +165,25 @@
             let selectSprite_icon = document.createElement('img');
             selectSprite_icon.src = "./core_sys/img/ui/user_add.svg";
             selectSprite_Button.appendChild(selectSprite_icon);
+            //すでにlocalStorageにデータがある場合はselectedクラスを追加
+            if (CopilotLS.getData(sprite_name)) {
+                newDiv.classList.add('selected');
+                selectSprite_icon.src = "./core_sys/img/ui/user_remove.svg";
+            }
             selectSprite_Button.onclick = function () {
                 //選択/非選択の切り替えをボタンを押すごとに行う
                 //選択されているときには親の親のdiv要素にselectedクラスを追加する
                 if (newDiv.classList.contains('selected')) {
                     selectSprite_icon.src = "./core_sys/img/ui/user_add.svg";
+                    CopilotLS.removeData(sprite_name);
                     newDiv.classList.remove('selected');
                 } else {
                     selectSprite_icon.src = "./core_sys/img/ui/user_remove.svg";
+                    CopilotLS.saveData(sprite_name, {
+                        "X": 0,
+                        "Y": 0,
+                        "ZoomRate": 1.0
+                    });
                     newDiv.classList.add('selected');
                 }
 
@@ -182,11 +226,10 @@
         object-fit: cover;
     }
 
-    #close_add_sprite {
+    .close_add_sprite {
         /*画面中央*/
-        position: fixed;
+        position: relative;
         left: 50%;
-
     }
 
     #CardButtons {

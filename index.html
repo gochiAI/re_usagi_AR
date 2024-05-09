@@ -83,48 +83,4 @@
     </footer>
 </body>
 <script type="module" src="./app.js"></script>
-<script>
-
-    document.getElementById('button_edit').addEventListener('click', function () {
-        var editTab = document.getElementById('edit_tab');
-        if (editTab.classList.contains('show')) {
-            editTab.classList.remove('show');
-        } else {
-            editTab.classList.add('show');
-        }
-    });
-    function createButtonWithImage(imagePath, sprite_name) {
-        return `
-        <button onclick="editSprite(this,'${sprite_name}')">
-            <img id="spriteImage" src="${imagePath}" alt="sprite" />
-        </button>
-    `;
-    }
-    function editSprite(button, sprite_name) {
-        if (button.classList.contains("selected")) {
-            button.classList.remove("selected");
-            console.log("Unselected Sprite:", sprite_name);
-        } else {
-            document.querySelectorAll("#tab_sprite button").forEach((btn) => {
-                btn.classList.remove("selected");
-            });
-            button.classList.add("selected");
-            console.log("Selected Sprite:", sprite_name);
-        }
-    }
-    var sprite_list = [
-        {
-            path: "https://raw.githubusercontent.com/gochiAI/usagi_AR/main/aws.gochiusa.com/img/ekimemo/chino_angry_thumb.png",
-            name: "chino_angry",
-        },
-        { path: "", name: "" },
-    ];
-    sprite_list.forEach((sprite) => {
-        document.getElementById("tab_sprite").innerHTML += createButtonWithImage(
-            sprite.path,
-            sprite.name
-        );
-    });
-</script>
-
 </html>
