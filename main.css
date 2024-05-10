@@ -1,51 +1,40 @@
+/*<general>*/
+button > img {
+  height: 1em;
+  width: 1em;
+}
+
+/*<header area>*/
+header,
+#service_logo,
+#help,
+#help_content,
+#button_help,
+#button_help_close,
 canvas,
-video {
+video,
+#edit_tab,
+footer,
+#setting,
+#button_edit,
+#button_camera,
+#button_flip {
   position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1;
 }
 header {
   width: 100%;
 
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 2;
-}
-
-#edit_tab {
-  position: absolute;
-  width: 100%;
-  bottom: 40px;
-  left: 0;
-  z-index: 3;
-  background-color: aliceblue;
-  display: none;
-  transition: transform 1.2s ease-out;
-  transform: translateY(100%);
-}
-#edit_tab.show {
-  transform: translateY(0);
-  display: block;
-}
-footer {
-  width: 100%;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  z-index: 2;
-}
-button>img {
-  height: 1em;
-  width: 1em;
-}
-#setting {
-  position: absolute;
   top: 0;
   left: 0;
   z-index: 3;
-  background-color: aliceblue;
+}
+#service_logo {
+  height: 50px;
+  padding: 4px;
+  top: 0;
+  /*常に画面の中央に配置*/
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 #help {
@@ -54,7 +43,6 @@ button>img {
   overflow: hidden;
   -ms-overflow-style: none;
   overflow-y: scroll;
-  position: absolute;
   top: 0;
   right: 0;
   z-index: 3;
@@ -73,49 +61,64 @@ button>img {
   z-index: 3;
   background-color: aliceblue;
 }
-#service_logo {
-  position: absolute;
-  height: 50px;
+#button_help {
+  max-width: calc(100vw - 80px);
   padding: 4px;
+  top: 10px;
+  right: 10px;
+}
+
+#button_help_close {
+  max-width: calc(100vw - 80px);
+  padding: 4px;
+  top: 10px;
+  right: 10px;
+}
+
+canvas {
   top: 0;
-  /*常に画面の中央に配置*/
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  z-index: 2;
+}
+video {
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+#edit_tab {
+  width: 100%;
+  bottom: 40px;
+  left: 0;
+  z-index: 3;
+  background-color: aliceblue;
+  display: none;
+  transition: transform 1.2s ease-out;
+  transform: translateY(100%);
+}
+#edit_tab.show {
+  transform: translateY(0);
+  display: block;
+}
+
+footer {
+  width: 100%;
+
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+}
+
+#setting {
+  top: 0;
+  left: 0;
+  z-index: 3;
+  background-color: aliceblue;
 }
 
 /* Button Postison */
-#button_setting {
-  position: absolute;
-  max-width: calc(100vw - 80px);
-  padding: 4px;
-  top: 10px;
-  left: 10px;
-}
 
-#button_help {
-  position: absolute;
-  max-width: calc(100vw - 80px);
-  padding: 4px;
-  top: 10px;
-  right: 10px;
-}
-
-#button_setting_close {
-  position: absolute;
-  max-width: calc(100vw - 80px);
-  padding: 4px;
-  top: 10px;
-  left: 10px;
-}
-#button_help_close {
-  position: absolute;
-  max-width: calc(100vw - 80px);
-  padding: 4px;
-  top: 10px;
-  right: 10px;
-}
 #button_edit {
-  position: absolute;
   max-width: calc(100vw - 80px);
   padding: 4px;
   bottom: 10px;
@@ -123,28 +126,27 @@ button>img {
 }
 
 .accordion {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .accordion-item {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 .accordion-item .accordion-header {
-    cursor: pointer;
-    background-color: lightgray;
-    padding: 10px;
+  cursor: pointer;
+  background-color: lightgray;
+  padding: 10px;
 }
 
 .accordion-item .accordion-content {
-    display: block;
-    padding: 10px;
-    max-height: 1000px;
+  display: block;
+  padding: 10px;
+  max-height: 1000px;
 }
 
 #button_camera {
-  position: absolute;
   max-width: calc(100vw - 80px);
   padding: 4px;
   bottom: 10px;
@@ -153,7 +155,6 @@ button>img {
 }
 
 #button_flip {
-  position: absolute;
   max-width: calc(100vw - 80px);
   padding: 4px;
   bottom: 10px;
@@ -174,7 +175,6 @@ button>img {
 }
 
 #tab_sprite #add_sprite {
-  position: absolute;
   left: 0px;
   margin-left: 10px;
 }
@@ -189,4 +189,3 @@ button>img {
   width: 100%;
   height: 100%;
 }
-

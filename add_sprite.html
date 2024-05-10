@@ -1,61 +1,74 @@
 <div id="filter_buttons">
     <!--  プルダウンメニュー 1:ekimemo,2:alarm,3:lessar,0:all  -->
     <select id="Event_filter">
-        <option value="ev-0">全て</option>
-        <option value="ev-ekimemo">ekimemo</option>
-        <option value="ev-alarm">alarm</option>
-        <option value="ev-lessar">lessar</option>
     </select>
     <!--　プルダウンメニュー　-->
     <select id="Character_filter">
-        <option value="ch-0">全て</option>
-        <option value="ch-chino">chino</option>
-        <option value="ch-cocoa">cocoa</option>
-        <option value="ch-rize">rize</option>
-        <option value="ch-chiya">chiya</option>
-        <option value="ch-syaro">syaro</option>
-        <option value="ch-maya">maya</option>
-        <option value="ch-megu">megu</option>
-        <option value="ch-fuyu">fuyu</option>
     </select>
     <button class="close_add_sprite">閉じる</button>
 </div>
-
 
 <div id="Sprites_List">
 </div>
 <button class="close_add_sprite">閉じる</button>
 <script>
     class LocalStorageUtility {
-        //一つのローカルストレージにすべてのデータを保存する
-        //データはJSON形式で保存されるため、JSON.parse()で取り出す
-        getStorage = function () {
-            return JSON.parse(localStorage.getItem('sprites_config')) || {};
+        getStorage(key = null) {
+            const data = JSON.parse(localStorage.getItem('sprites_config')) || {};
+            return key ? data[key] : data;
         }
-        setStorage = function (data) {
+
+        setStorage(key, value) {
+            const data = this.getStorage();
+            data[key] = value;
             localStorage.setItem('sprites_config', JSON.stringify(data));
         }
 
-        //データを保存する
-        saveData(key, value) {
-            let data = this.getStorage();
-            //setdefaultのような動きをする
-            data[key]=value;
-            this.setStorage(data);
-        }
-        //データを取得する
-        getData(key) {
-            let data = this.getStorage();
-            return data[key];
-        }
-        //データを削除する
-        removeData(key){
-            let data = this.getStorage();
+        removeData(key) {
+            const data = this.getStorage();
             delete data[key];
-            this.setStorage(data);
+        }
+
+        getAllKeys() {
+            return Object.keys(this.getStorage());
         }
     }
-    // リストデータを取得します
+    class get_src {
+        sprite_ID(sprite_name) {
+            if (sprite_name.endsWith("_0")) {
+                sprite_name = sprite_name.replace("_0", ".png");
+            } else {
+                sprite_name = sprite_name + '.png';
+            }
+            return sprite_name;
+        }
+
+        get_stand_src(sprite_name) {
+            return `./core_sys/img/stand_sprites/${this.sprite_ID(sprite_name)}`;
+        }
+
+        get_thumb_src(sprite_name) {
+            return `./core_sys/img/thumb_sprites/${this.sprite_ID(sprite_name)}`;
+        }
+
+        get_stand_size(sprite_name) {
+            return new Promise((resolve, reject) => {
+                var src = this.get_stand_src(sprite_name);
+                var img = new Image();
+                img.src = src;
+                img.onload = function () {
+                    var width = img.width;
+                    var height = img.height;
+                    resolve([width, height]);
+                }
+                img.onerror = function () {
+                    img.src = './path_to_your_404_image.png'; // Add this line
+                    reject('Image not found');
+                }
+            });
+        }
+    }
+
     var CharacterDatas = ["alarm/chino_0", "alarm/chiya_0", "alarm/cocoa_0", "alarm/rize_0", "alarm/syaro_0",
         "lessar/chino_0", "lessar/chiya_0", "lessar/cocoa_0", "lessar/rize_0", "lessar/syaro_0", "lessar/maya_0", "lessar/megu_0", "lessar/fuyu_0",
         "ekimemo/chino_usual", "ekimemo/chino_smile", "ekimemo/chino_angry", "ekimemo/chino_dovey", "ekimemo/chino_tired",
@@ -68,134 +81,99 @@
     ];
 
     var CopilotLS = new LocalStorageUtility();
+    const events = ['全て', 'ekimemo', 'alarm', 'lessar'];
+    const characters = ['全て', 'chino', 'cocoa', 'rize', 'chiya', 'syaro', 'maya', 'megu', 'fuyu'];
 
-    // 親div要素を取得します
-    let parentDiv = document.querySelector('#Sprites_List');
-    var eventFilter = document.getElementById('Event_filter');
-    var characterFilter = document.getElementById('Character_filter');
+    const eventFilter = document.getElementById('Event_filter');
+    const characterFilter = document.getElementById('Character_filter');
 
-    // プルダウンメニューのchangeイベントにリスナーを追加
-    eventFilter.addEventListener('change', filterList);
-    characterFilter.addEventListener('change', filterList);
-
-    var get_img_src = function (sprite_name) {
-        // sprite_nameが*/0で終わっている場合は/0を.pngに置換する
-        if (sprite_name.endsWith("_0")) {
-            sprite_name = sprite_name.replace("_0", ".png");
-        } else {
-            // 二番目のスラッシュをアンダーバーに置換する
-            sprite_name = sprite_name + '.png';
-        }
-        return sprite_name;
-    }
-    //selectデータの変更時にリストを再描画する
+    events.forEach((event) => {
+        const option = document.createElement('option');
+        option.value = event;
+        option.text = event;
+        eventFilter.appendChild(option);
+    });
+    characters.forEach((character) => {
+        const option = document.createElement('option');
+        option.value = character;
+        option.text = character;
+        characterFilter.appendChild(option);
+    });
     function filterList() {
-        // 選択されたオプションの値を取得
-        var selectedEvent = eventFilter.value;
-        var selectedCharacter = characterFilter.value;
-        // Sprites_Listの子要素を全て削除
-        while (parentDiv.firstChild) {
-            parentDiv.removeChild(parentDiv.firstChild);
-        }
-        // フィルター値に応じてリストを再作成
-        var filterList = CharacterDatas.filter(
-            function (sprite_name) {
-                //両方とも0,0なら何もしない
-                if (selectedEvent == "ev-0" && selectedCharacter == "ch-0") {
-                    return true;
-                }
-                //それ以外の場合は-以降の文字列を取得
-                else {
-                    let event = selectedEvent.split('-')[1];
-                    let character = selectedCharacter.split('-')[1];
+        const selectedEvent = eventFilter.value;
+        const selectedCharacter = characterFilter.value;
+        const filterList = CharacterDatas.filter(sprite_name => {
+            if (selectedEvent === "全て" && selectedCharacter === "全て") return true;
+            if (selectedEvent !== "全て" && selectedCharacter === "全て") return sprite_name.includes(selectedEvent);
+            if (selectedEvent === "全て" && selectedCharacter !== "全て") return sprite_name.includes(selectedCharacter);
+            return sprite_name.includes(selectedEvent) && sprite_name.includes(selectedCharacter);
+        });
 
-                    //イベントが0以外の場合はイベントが一致するものだけを表示
-                    if (event != "0" && character == "0") {
-
-                        return sprite_name.includes(event);
-                    }
-                    //キャラクターが0以外の場合はキャラクターが一致するものだけを表示
-                    else if (event == "0" && character != "0") {
-                        return sprite_name.includes(character);
-                    }
-                    //両方とも0以外の場合は両方が一致するものだけを表示
-                    else {
-                        return sprite_name.includes(event) && sprite_name.includes(character);
-                    }
-                }
-            });
+        parentDiv.innerHTML = '';
         displayCh(filterList);
     }
 
+    function createButton(iconSrc, onClick) {
+        const button = document.createElement('button');
+        const icon = document.createElement('img');
+        icon.src = iconSrc;
+        button.appendChild(icon);
+        button.onclick = onClick;
+        return button;
+    }
+
     function displayCh(CharacterDatas) {
-        for (let i = 0; i < CharacterDatas.length; i++) {
-            // 新しいdiv要素を作成します
-            let newDiv = document.createElement('div');
-
-
-            // 作成したdiv要素に"SpriteCard"というクラスを追加します
+        CharacterDatas.forEach(sprite_name => {
+            const newDiv = document.createElement('div');
             newDiv.classList.add("SpriteCard");
-            let img = document.createElement('img');
-            img.src = "./core_sys/img/thumb_sprites/" + get_img_src(CharacterDatas[i]);
-            let sprite_name = CharacterDatas[i];
+
+            const img = document.createElement('img');
+            img.src = new get_src().get_thumb_src(sprite_name);
+
             newDiv.appendChild(img);
-            let CardButtons = document.createElement('div');
+
+            const CardButtons = document.createElement('div');
             CardButtons.id = "CardButtons";
-            let imgZoom_Button = document.createElement('button');
-            let imgZoom_icon = document.createElement('img');
-            imgZoom_icon.src = "./core_sys/img/ui/img_zoom.svg";
-            imgZoom_Button.appendChild(imgZoom_icon)
-            imgZoom_Button.onclick = function () {
-                let Img_Modal = document.createElement('div');
+
+            const imgZoom_Button = createButton("./core_sys/img/ui/img_zoom.svg", function () {
+                const Img_Modal = document.createElement('div');
                 Img_Modal.id = "Img_Modal";
-
-                Img_Modal.onclick = function () {
-                    //Img_Modalを削除
-                    Img_Modal.remove();
-                };
-
-                let img = document.createElement('img');
-                img.src = "./core_sys/img/stand_sprites/" + get_img_src(CharacterDatas[i]);
+                Img_Modal.onclick = function () { Img_Modal.remove(); };
+                const img = document.createElement('img');
+                img.src = new get_src().get_stand_src(sprite_name);
                 Img_Modal.appendChild(img);
                 document.body.appendChild(Img_Modal);
+            });
 
-            };
-
-            let selectSprite_Button = document.createElement('button');
-            let selectSprite_icon = document.createElement('img');
-            selectSprite_icon.src = "./core_sys/img/ui/user_add.svg";
-            selectSprite_Button.appendChild(selectSprite_icon);
-            //すでにlocalStorageにデータがある場合はselectedクラスを追加
-            if (CopilotLS.getData(sprite_name)) {
-                newDiv.classList.add('selected');
-                selectSprite_icon.src = "./core_sys/img/ui/user_remove.svg";
-            }
-            selectSprite_Button.onclick = function () {
-                //選択/非選択の切り替えをボタンを押すごとに行う
-                //選択されているときには親の親のdiv要素にselectedクラスを追加する
+            const selectSprite_Button = createButton(CopilotLS.getStorage(sprite_name) ? "./core_sys/img/ui/user_remove.svg" : "./core_sys/img/ui/user_add.svg", function () {
+                const selectSprite_icon = this.firstChild; // Add this line
                 if (newDiv.classList.contains('selected')) {
                     selectSprite_icon.src = "./core_sys/img/ui/user_add.svg";
                     CopilotLS.removeData(sprite_name);
                     newDiv.classList.remove('selected');
                 } else {
                     selectSprite_icon.src = "./core_sys/img/ui/user_remove.svg";
-                    CopilotLS.saveData(sprite_name, {
-                        "X": 0,
-                        "Y": 0,
-                        "ZoomRate": 1.0
-                    });
+                    CopilotLS.setStorage(sprite_name, { "X": 0, "Y": 0, "ZoomRate": 1.0 });
                     newDiv.classList.add('selected');
                 }
+            });
 
-            };
-            // 作成したdiv要素を親div要素に追加します
+            if (CopilotLS.getStorage(sprite_name)) newDiv.classList.add('selected');
+
             CardButtons.appendChild(imgZoom_Button);
             CardButtons.appendChild(selectSprite_Button);
             newDiv.appendChild(CardButtons);
 
             parentDiv.appendChild(newDiv);
-        }
+        });
     }
+
+    let parentDiv = document.querySelector('#Sprites_List');
+
+
+    eventFilter.addEventListener('change', filterList);
+    characterFilter.addEventListener('change', filterList);
+
     displayCh(CharacterDatas);
 </script>
 <style>

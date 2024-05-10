@@ -1,37 +1,23 @@
-// Utility for local storage operations
 class LocalStorageUtility {
-    //一つのローカルストレージにすべてのデータを保存する
-    //データはJSON形式で保存されるため、JSON.parse()で取り出す
-    getStorage = function () {
-        return JSON.parse(localStorage.getItem('sprites_config')) || {};
+    getStorage(key = null) {
+        const data = JSON.parse(localStorage.getItem('sprites_config')) || {};
+        return key ? data[key] : data;
     }
-    setStorage = function (data) {
+
+    setStorage(key, value) {
+        const data = this.getStorage();
+        data[key] = value;
         localStorage.setItem('sprites_config', JSON.stringify(data));
     }
 
-    //データを保存する
-    saveData(key, value) {
-        let data = this.getStorage();
-        //setdefaultのような動きをする
-        data[key] = value;
-        this.setStorage(data);
-    }
-    //データを取得する
-    getData(key) {
-        let data = this.getStorage();
-        return data[key];
-    }
-    //データを削除する
     removeData(key) {
-        let data = this.getStorage();
+        const data = this.getStorage();
         delete data[key];
-        this.setStorage(data);
+        this.setStorage(key, null);
     }
 
     getAllKeys() {
-        let data = this.getStorage();
-        return Object.keys(data);
-
+        return Object.keys(this.getStorage());
     }
 }
 
@@ -57,20 +43,25 @@ class set_cAv {
         this.canvas = canvas;
         this.video = video;
         this.ctx = this.canvas.getContext('2d');
-
+        this.set_canvas();
+        this.set_video();
     }
     get_device_size() {
-        this.device_width = window.innerWidth;
-        this.device_height = window.innerHeight;
+        return {
+            width: window.innerWidth,
+            height: window.innerHeight
+        };
     }
     set_canvas() {
-        this.canvas.width = this.device_width;
-        this.canvas.height = this.device_height;
+        const { width, height } = this.get_device_size();
+        this.canvas.width = width;
+        this.canvas.height = height;
         main.appendChild(this.canvas);
     }
     set_video() {
-        this.video.width = this.device_width;
-        this.video.height = this.device_height;
+        const { width, height } = this.get_device_size();
+        this.video.width = width;
+        this.video.height = height;
         this.video.autoplay = true;
         this.CONSTRAINTS = {
             audio: false,
@@ -84,79 +75,97 @@ class set_cAv {
 
         main.appendChild(this.video);
     }
+}
+class video_stream {
+    constructor(video, CONSTRAINTS) {
+        this.video = video;
+        this.CONSTRAINTS = CONSTRAINTS;
+        this.curSTREAM = null;
+        this.initCamera();
+        this.syncCamera();
+    }
+    syncCamera(is_front = false) {
+        this.CONSTRAINTS.video.facingMode = is_front
+            ? "user"
+            : { exact: "environment" };
 
+        if (this.curSTREAM !== null) {
+            this.curSTREAM.getVideoTracks().forEach((camera) => {
+                camera.stop();
+            });
+        }
+    }
+    //カメラの初期設定
+    async initCamera() {
+        try {
+            this.curSTREAM = await navigator.mediaDevices.getUserMedia(this.CONSTRAINTS);
+            this.video.srcObject = this.curSTREAM;
+
+            this.video.onloadeddata = (e) => {
+                this.video.play();
+            };
+        } catch (error) {
+            console.error("Error accessing the camera: ", error);
+        }
+    }
 }
 
 class chara_sprite {
     constructor(sprite_name) {
+        const spriteData = CopilotLS.getStorage(sprite_name) || {};
         this.sprite_name = sprite_name;
         this.src = new get_src().get_stand_src(sprite_name);
-        console.log(this.src);
-        this.x = CopilotLS.getData(sprite_name).X;
-        this.y = CopilotLS.getData(sprite_name).Y;
+        this.x = spriteData.X;
+        this.y = spriteData.Y;
         this.width = 300;
         this.height = 500;
-        this.ZoomRate = CopilotLS.getData(sprite_name).ZoomRate;
+        this.ZoomRate = spriteData.ZoomRate;
     }
     set_sprite() {
         this.img = new Image();
         this.img.src = this.src;
-        let self = this; // thisを保存
-        this.img.onload = function () {
-            set_cAv.ctx.drawImage(self.img, self.x, self.y, self.width * self.ZoomRate, self.height * self.ZoomRate);
+        this.img.onload = () => {
+            set_cAv.ctx.drawImage(this.img, this.x, this.y, this.width * this.ZoomRate, this.height * this.ZoomRate);
         }
     }
-
 }
 class get_src {
-    constructor() {
-        this.sprite_name = "";
-    }
-    sprite_ID = function (sprite_name) {
+    sprite_ID(sprite_name) {
         if (sprite_name.endsWith("_0")) {
             sprite_name = sprite_name.replace("_0", ".png");
         } else {
-            // 二番目のスラッシュをアンダーバーに置換する
             sprite_name = sprite_name + '.png';
         }
         return sprite_name;
-    };
+    }
 
-    get_stand_src = function (sprite_name) {
+    get_stand_src(sprite_name) {
         return `./core_sys/img/stand_sprites/${this.sprite_ID(sprite_name)}`;
     }
-    get_thumb_src = function (sprite_name) {
+
+    get_thumb_src(sprite_name) {
         return `./core_sys/img/thumb_sprites/${this.sprite_ID(sprite_name)}`;
     }
-}
 
-
-
-var get_stand_size = function (sprite_name) {
-    var src = new get_src().get_stand_src(sprite_name);
-    var img = new Image();
-    img.src = src;
-    img.onload = function () {
-        var width = img.width;
-        var height = img.height;
-        return [width, height];
+    get_stand_size(sprite_name) {
+        return new Promise((resolve, reject) => {
+            var src = this.get_stand_src(sprite_name);
+            var img = new Image();
+            img.src = src;
+            img.onload = function () {
+                var width = img.width;
+                var height = img.height;
+                resolve([width, height]);
+            }
+            img.onerror = reject;
+        });
     }
 }
-CopilotLS.getAllKeys().forEach(function (key) {
-    var chara = new chara_sprite(key);
-    chara.set_sprite();
-})
 
+// 名前空間を作成
+var App = {};
 
-document.getElementById('button_edit').addEventListener('click', function () {
-    var editTab = document.getElementById('edit_tab');
-    if (editTab.classList.contains('show')) {
-        editTab.classList.remove('show');
-    } else {
-        editTab.classList.add('show');
-    }
-});
-window.editSprite = function(button, sprite_name) {
+App.editSprite = function (button, sprite_name) {
     if (button.classList.contains("selected")) {
         button.classList.remove("selected");
         console.log("Unselected Sprite:", sprite_name);
@@ -168,24 +177,23 @@ window.editSprite = function(button, sprite_name) {
         console.log("Selected Sprite:", sprite_name);
     }
 }
-function createButtonWithImage(imagePath, sprite_name) {
+
+App.createButtonWithImage = function (imagePath, sprite_name) {
     return `
-    <button onclick="editSprite(this,'${sprite_name}')">
+    <button onclick="App.editSprite(this,'${sprite_name}')">
         <img id="spriteImage" src="${imagePath}" alt="sprite" />
     </button>
 `;
 }
 
-CopilotLS.getAllKeys().forEach(function (key) {
-    var img = new Image();
-    img.src = new get_src().get_thumb_src(key);
-    img.onload = function () {
-        var button = createButtonWithImage(img.src, key);
-        document.getElementById('tab_sprite').innerHTML += button;
-    }
-}
-);
-set_cAv = new set_cAv();
-set_cAv.get_device_size();
-set_cAv.set_canvas();
-set_cAv.set_video();
+CopilotLS.getAllKeys().forEach((sprite_name) => {
+    const thumbSrc = new get_src().get_thumb_src(sprite_name);
+    const button = App.createButtonWithImage(thumbSrc, sprite_name);
+    document.getElementById("tab_sprite").innerHTML += button;
+});
+
+
+
+
+var standby = new set_cAv();
+var videoStream = new video_stream(standby.video, standby.CONSTRAINTS);
