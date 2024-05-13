@@ -45,7 +45,8 @@ header {
   overflow-y: scroll;
   top: 0;
   right: 0;
-  z-index: 3;
+
+  z-index: 8;
   background-color: aliceblue;
   display: none;
 }
@@ -188,4 +189,75 @@ footer {
   object-fit: contain;
   width: 100%;
   height: 100%;
+}
+
+#add_sprite {
+  display: none;
+  background-color: bisque;
+  position: absolute;
+  z-index:5;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+#Sprites_List {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap
+}
+
+.SpriteCard {
+  border: 4px solid #000;
+  width: 150px;
+  height: 150px;
+  margin: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.SpriteCard.selected {
+  border: 4px dashed blue;
+}
+
+.SpriteCard img {
+  width: 80%;
+  height: 80%;
+  object-fit: cover;
+}
+
+.close_add_sprite {
+  /*画面中央*/
+  position: relative;
+  left: 50%;
+}
+
+#CardButtons {
+  position: absolute;
+  bottom: 5px;
+}
+
+#CardButtons button {
+  margin: 0px 5px;
+}
+
+#Img_Modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.5);
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+#Img_Modal img {
+  width: auto;
+  height: 80%;
 }

@@ -8,8 +8,7 @@
 
 <body>
     <div id="help">
-        <button type="button" id="button_help_close"
-            onclick="document.getElementById('help').classList.remove('show');">
+        <button type="button" id="button_help_close">
             <img src="./core_sys/img/ui/close_btn.svg" alt="Close_HelpTab" />
         </button>
         <div id="help_content">
@@ -60,12 +59,24 @@
         </div>
     </div>
     <header>
-        <img src="./usagi_AR.svg" id="service_logo" /><button type="button" id="button_help"
-            onclick="document.getElementById('help').classList.add('show');">
+        <img src="./usagi_AR.svg" id="service_logo" /><button type="button" id="button_help">
             <img src="./core_sys/img/ui/help.svg" alt="Open_HelpTab" />
         </button>
     </header>
 
+    <div id="add_sprite">
+        <div id="filter_buttons">
+            <select id="Event_filter">
+            </select>
+            <select id="Character_filter">
+            </select>
+            <button class="close_add_sprite">閉じる</button>
+        </div>
+
+        <div id="Sprites_List">
+        </div>
+        <button class="close_add_sprite">閉じる</button>
+    </div>
     <div id="main">
     </div>
     <div id="edit_tab">
