@@ -1,3 +1,4 @@
+/*ローカルストレージに対し様々な操作を行う*/
 class LocalStorageUtility {
     getStorage(key = null) {
         const data = JSON.parse(localStorage.getItem('sprites_config')) || {};
@@ -171,14 +172,17 @@ class set_ASW {
         this.CharacterDatas = new system_data().CharacterDatas;
         this.Events = new system_data().Events;
         this.Character = new system_data().Character;
+        this.Cards = document.getElementById('Sprites_List');
         this.eventFilter = document.getElementById('Event_filter');
         this.characterFilter = document.getElementById('Character_filter');
         this.optionCreates(this.eventFilter, this.Events);
         this.optionCreates(this.characterFilter, this.Character);
+        this.filterList();
+        this.displayCh(this.CharacterDatas);
     }
     optionCreates = (f, value) => {
-        const option = document.createElement('option');
         value.forEach((v) => {
+            const option = document.createElement('option');
             option.value = v;
             option.text = v;
             f.appendChild(option);
@@ -188,14 +192,13 @@ class set_ASW {
         const selectedEvent = this.eventFilter.value;
         const selectedCharacter = this.characterFilter.value;
 
-        const filterList = CharacterDatas.filter(sprite_name => {
+        const filterList = this.CharacterDatas.filter(sprite_name => {
             if (selectedEvent === "全て" && selectedCharacter === "全て") return true;
             if (selectedEvent === "全て") return sprite_name.includes(selectedCharacter);
             if (selectedCharacter === "全て") return sprite_name.includes(selectedEvent);
             return sprite_name.includes(selectedEvent) && sprite_name.includes(selectedCharacter);
         });
-
-        parentDiv.innerHTML = '';
+        this.Cards.innerHTML = "";
         this.displayCh(filterList);
     }
     createButton = (iconSrc, onClick) => {
@@ -219,7 +222,7 @@ class set_ASW {
             const CardButtons = document.createElement('div');
             CardButtons.id = "CardButtons";
 
-            const imgZoom_Button = createButton("./core_sys/img/ui/img_zoom.svg", function () {
+            const imgZoom_Button = this.createButton("./core_sys/img/ui/img_zoom.svg", function () {
                 const Img_Modal = document.createElement('div');
                 Img_Modal.id = "Img_Modal";
                 Img_Modal.onclick = function () { Img_Modal.remove(); };
@@ -229,7 +232,7 @@ class set_ASW {
                 document.body.appendChild(Img_Modal);
             });
 
-            const selectSprite_Button = createButton(CopilotLS.getStorage(sprite_name) ? "./core_sys/img/ui/user_remove.svg" : "./core_sys/img/ui/user_add.svg", function () {
+            const selectSprite_Button = this.createButton(CopilotLS.getStorage(sprite_name) ? "./core_sys/img/ui/user_remove.svg" : "./core_sys/img/ui/user_add.svg", function () {
                 const selectSprite_icon = this.firstChild; // Add this line
                 if (newDiv.classList.contains('selected')) {
                     selectSprite_icon.src = "./core_sys/img/ui/user_add.svg";
@@ -247,29 +250,55 @@ class set_ASW {
             CardButtons.appendChild(imgZoom_Button);
             CardButtons.appendChild(selectSprite_Button);
             newDiv.appendChild(CardButtons);
-
-            parentDiv.appendChild(newDiv);
+            this.Cards.appendChild(newDiv);
         });
 
     }
 }
-
+/*tab_spriteに対しての処理
+1.localstorageからデータを取得
+2.データを元に必要なボタンを作成
+3.ボタンをクリックした時の処理を記述
+*/
+var p=document.getElementById('tab_sprite');
+CopilotLS.getAllKeys().forEach(sprite_name => {
+    const newDiv = document.createElement('button');
+    const img = document.createElement('img');
+    img.src = new get_src().get_thumb_src(sprite_name);
+    newDiv.appendChild(img);
+    newDiv.onclick = function () {
+        
+    };
+    p.appendChild(newDiv);
+    });
 //各ボタンに対応する処理を追加
-document.getElementById('button_help_close').onclick = function () {
-    document.getElementById('help').classList.remove('show');
-}
-document.getElementById('button_help').onclick = function () {
-    document.getElementById('help').classList.add('show');
-}
-document.getElementById('button_edit').onclick = function () {
-    if (document.getElementById('edit_tab').classList.contains('show')) {
-        document.getElementById('edit_tab').classList.remove('show');
-    }
-    else {
-        document.getElementById('edit_tab').classList.add('show');
-    }
+// クリックイベントのハンドラを設定する関数
+function setClickHandler(id, callback) {
+    document.getElementById(id).onclick = callback;
 }
 
+// クラスを追加/削除する関数
+function toggleClass(id, className) {
+    const element = document.getElementById(id);
+    element.classList.contains(className) ? element.classList.remove(className) : element.classList.add(className);
+}
+
+// クリックイベントのハンドラを設定
+setClickHandler('button_help_close', () => document.getElementById('help').classList.remove('show'));
+setClickHandler('button_help', () => document.getElementById('help').classList.add('show'));
+setClickHandler('button_edit', () => toggleClass('edit_tab', 'show'));
+setClickHandler('button_add', () => {
+    document.getElementById('add_sprite').classList.add('show');
+    const AddSpriteWindow = new set_ASW();
+    AddSpriteWindow.eventFilter.onchange = AddSpriteWindow.filterList;
+    AddSpriteWindow.characterFilter.onchange = AddSpriteWindow.filterList;
+    AddSpriteWindow.displayCh(AddSpriteWindow.CharacterDatas);
+});
+
+// 'close_add_sprite'クラスを持つすべての要素に対してハンドラを設定
+Array.from(document.getElementsByClassName('close_add_sprite')).forEach(element => {
+    element.onclick = () => document.getElementById('add_sprite').classList.remove('show');
+});
 let s_cAv = new set_cAv();
 let m_video = new video_stream();
 document.getElementById('button_flip').onclick = function () {
@@ -296,4 +325,4 @@ document.getElementById('button_camera').onclick = function () {
     Img_Modal.onclick = function () { Img_Modal.remove(); };
     Img_Modal.appendChild(img);
     document.body.appendChild(Img_Modal);
-    }
+}

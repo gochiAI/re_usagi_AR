@@ -193,18 +193,27 @@ footer {
 
 #add_sprite {
   display: none;
-  background-color: bisque;
+}
+#add_sprite.show {
+  display: block;
   position: absolute;
-  z-index:5;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+  background-color: sandybrown;
+  z-index: 100;
 }
 #Sprites_List {
   display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap
+  max-height: 80vh;
+  overflow-y: scroll;
+
+  justify-content: space-evenly;
+  width: 90%;
+  flex-wrap: wrap;
+  padding: 10px 10px;
+  margin: 10px;
 }
 
 .SpriteCard {
