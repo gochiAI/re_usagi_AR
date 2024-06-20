@@ -7,11 +7,8 @@
 </head>
 
 <body>
-    <div id="help">
-        <button type="button" id="button_help_close">
-            <img src="./core_sys/img/ui/close_btn.svg" alt="Close_HelpTab" />
-        </button>
-        <div id="help_content">
+    <div id="HelpWindow">
+        <div id="HelpContent">
             <div class="accordion">
                 <div class="accordion-item">
                     <div class="accordion-header">このserviceはなんですか?</div>
@@ -64,25 +61,22 @@
         </button>
     </header>
 
-    <div id="add_sprite">
-        <div id="filter_buttons">
-            <select id="Event_filter">
+    <div id="SpriteAddWindow">
+        <div id="SpritesFilter">
+            <select id="EventFilter">
             </select>
-            <select id="Character_filter">
+            <select id="CharacterFilter">
             </select>
             <button class="close_add_sprite">閉じる</button>
         </div>
 
-        <div id="Sprites_List">
+        <div id="SpritesList">
         </div>
         <button class="close_add_sprite">閉じる</button>
     </div>
     <div id="main">
     </div>
-    <div id="edit_tab">
-        <div id="tab_sprite"><button id="button_add" onclick="add_sprite()">
-                <img src="./core_sys/img/ui/user_add.svg" alt="user_add" />
-            </button></div>
+    <div id="SpriteEditTab">
     </div>
     <footer>
         <button type="button" id="button_edit"><img src="./core_sys/img/ui/user_edit.svg" /></button>

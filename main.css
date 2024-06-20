@@ -1,21 +1,17 @@
-/*<general>*/
 button > img {
   height: 1em;
   width: 1em;
 }
 
-/*<header area>*/
 header,
 #service_logo,
-#help,
-#help_content,
+#HelpWindow,
+#HelpContent,
 #button_help,
-#button_help_close,
 canvas,
 video,
-#edit_tab,
+#SpriteEditTab,
 footer,
-#setting,
 #button_edit,
 #button_camera,
 #button_flip {
@@ -23,10 +19,9 @@ footer,
 }
 header {
   width: 100%;
-
   top: 0;
   left: 0;
-  z-index: 3;
+  z-index: 1;
 }
 #service_logo {
   height: 50px;
@@ -37,7 +32,7 @@ header {
   transform: translateX(-50%);
 }
 
-#help {
+#HelpWindow {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
@@ -46,20 +41,17 @@ header {
   top: 0;
   right: 0;
 
-  z-index: 8;
   background-color: aliceblue;
   display: none;
+  z-index: 1;
 }
-#help.show {
-  display: block;
-}
-#help::-webkit-scrollbar {
+#HelpWindow::-webkit-scrollbar {
   display: none;
 }
-#help_content {
+#HelpContent {
   position: relative;
   margin: 50px;
-  z-index: 3;
+
   background-color: aliceblue;
 }
 #button_help {
@@ -69,52 +61,35 @@ header {
   right: 10px;
 }
 
-#button_help_close {
-  max-width: calc(100vw - 80px);
-  padding: 4px;
-  top: 10px;
-  right: 10px;
-}
-
 canvas {
   top: 0;
   left: 0;
-  z-index: 2;
+  z-index: 0;
 }
 video {
   top: 0;
   left: 0;
+  z-index: -1;
+}
+
+#SpriteEditTab {
+  width: 100%;
+  bottom: 8%;
+  left: 0;
+
+  background-color: aliceblue;
+  display: none;
+
   z-index: 1;
 }
 
-#edit_tab {
-  width: 100%;
-  bottom: 40px;
-  left: 0;
-  z-index: 3;
-  background-color: aliceblue;
-  display: none;
-  transition: transform 1.2s ease-out;
-  transform: translateY(100%);
-}
-#edit_tab.show {
-  transform: translateY(0);
-  display: block;
-}
 
 footer {
   width: 100%;
 
   bottom: 0;
   left: 0;
-  z-index: 3;
-}
-
-#setting {
-  top: 0;
-  left: 0;
-  z-index: 3;
-  background-color: aliceblue;
+  z-index: 0;
 }
 
 /* Button Postison */
@@ -162,49 +137,47 @@ footer {
   right: 10px;
 }
 
-#tab_sprite {
+#SpriteEditTab {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
 }
 
-#tab_sprite button {
+#SpriteEditTab button {
   width: 40px;
   height: 40px;
   margin: 2px;
   padding: 2px;
 }
 
-#tab_sprite #add_sprite {
+#SpriteEditTab #SpriteAddWindow {
   left: 0px;
   margin-left: 10px;
 }
 
-#tab_sprite button.selected {
+#SpriteEditTab button.selected {
   border-color: blue;
   /* 選択されたボタンを強調表示 */
 }
 
-#tab_sprite img {
+#SpriteEditTab img {
   object-fit: contain;
   width: 100%;
   height: 100%;
 }
 
-#add_sprite {
+#SpriteAddWindow {
   display: none;
-}
-#add_sprite.show {
-  display: block;
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background-color: sandybrown;
-  z-index: 100;
+  z-index: 2;
 }
-#Sprites_List {
+
+#SpritesList {
   display: flex;
   max-height: 80vh;
   overflow-y: scroll;
@@ -263,10 +236,11 @@ footer {
 
   justify-content: center;
   align-items: center;
-  z-index: 10;
+  z-index: 3;
 }
 
 #Img_Modal img {
   width: auto;
   height: 80%;
+
 }

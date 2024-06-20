@@ -1,10 +1,8 @@
-/*ローカルストレージに対し様々な操作を行う*/
 class LocalStorageUtility {
     getStorage(key = null) {
         const data = JSON.parse(localStorage.getItem('sprites_config')) || {};
         return key ? data[key] : data;
     }
-
     setStorage(key, value) {
         const data = this.getStorage();
         data[key] = value;
@@ -14,11 +12,26 @@ class LocalStorageUtility {
     removeData(key) {
         const data = this.getStorage();
         delete data[key];
-        this.setStorage(key, null);
+        localStorage.setItem('sprites_config', JSON.stringify(data));
     }
 
     getAllKeys() {
         return Object.keys(this.getStorage());
+    }
+
+    setOperableSprite(sprite_name) {
+        if (typeof sprite_name === 'string') {
+            localStorage.setItem('operable_sprite', sprite_name);
+        } else {
+            throw new Error('sprite_name must be null or a string');
+        }
+    }
+    removeOperableSprite() {
+        localStorage.removeItem('operable_sprite');
+    }
+    // operable_spriteを取得するメソッド
+    getOperableSprite() {
+        return this.getStorage('operable_sprite') || null;
     }
 }
 
@@ -114,16 +127,15 @@ class video_stream {
         }
     }
 }
-
 class chara_sprite {
     constructor(sprite_name) {
         const spriteData = CopilotLS.getStorage(sprite_name) || {};
         this.sprite_name = sprite_name;
-        this.src = new get_src().get_stand_src(sprite_name);
+        this.src = new get_src().get_thumb_src(sprite_name);
         this.x = spriteData.X;
         this.y = spriteData.Y;
-        this.width = 300;
-        this.height = 500;
+        this.width = get_src().get_stand_size(sprite_name)[0];
+        this.height = get_src().get_stand_size(sprite_name)[1];
         this.ZoomRate = spriteData.ZoomRate;
     }
     set_sprite() {
@@ -172,9 +184,9 @@ class set_ASW {
         this.CharacterDatas = new system_data().CharacterDatas;
         this.Events = new system_data().Events;
         this.Character = new system_data().Character;
-        this.Cards = document.getElementById('Sprites_List');
-        this.eventFilter = document.getElementById('Event_filter');
-        this.characterFilter = document.getElementById('Character_filter');
+        this.Cards = document.getElementById('SpritesList');
+        this.eventFilter = document.getElementById('Eventfilter');
+        this.characterFilter = document.getElementById('Characterfilter');
         this.optionCreates(this.eventFilter, this.Events);
         this.optionCreates(this.characterFilter, this.Character);
         this.filterList();
@@ -255,74 +267,145 @@ class set_ASW {
 
     }
 }
-/*tab_spriteに対しての処理
-1.localstorageからデータを取得
-2.データを元に必要なボタンを作成
-3.ボタンをクリックした時の処理を記述
-*/
-var p=document.getElementById('tab_sprite');
-CopilotLS.getAllKeys().forEach(sprite_name => {
-    const newDiv = document.createElement('button');
-    const img = document.createElement('img');
-    img.src = new get_src().get_thumb_src(sprite_name);
-    newDiv.appendChild(img);
-    newDiv.onclick = function () {
-        
-    };
-    p.appendChild(newDiv);
+class CharaButton {
+    constructor(spriteName) {
+        this.spriteName = spriteName;
+        this.button = this.createButton();
+        this.setImage();
+    }
+
+    createButton() {
+        const button = document.createElement('button');
+        button.classList.add("chara_btn");
+        return button;
+    }
+
+    setImage() {
+        const img = new Image();
+        img.width = 100;
+        img.height = 100;
+        img.src = new get_src().get_thumb_src(this.spriteName);
+        img.onclick = () => {
+            if (CopilotLS.getOperableSprite() === this.spriteName) {
+                CopilotLS.removeOperableSprite();
+            } else {
+                CopilotLS.setOperableSprite(this.spriteName);
+            }
+        };
+        this.button.appendChild(img);
+    }
+
+    getButton() {
+        return this.button;
+    }
+}
+
+class SpriteEditTabManager {
+    constructor() {
+        this.buttonsContainer = document.getElementById('SpriteEditTab');
+        this.clearButtons();
+        this.initializeButtons();
+    }
+
+    clearButtons() {
+        while (this.buttonsContainer.firstChild) {
+            this.buttonsContainer.removeChild(this.buttonsContainer.firstChild);
+        }
+    }
+
+    initializeButtons() {
+        const spriteData = CopilotLS.getAllKeys();
+        spriteData.forEach(spriteName => {
+            const charaButton = new CharaButton(spriteName);
+            this.buttonsContainer.appendChild(charaButton.getButton());
+        });
+        this.addNewSpriteButton();
+    }
+
+    addNewSpriteButton() {
+        const addSpriteButton = document.createElement('button');
+        addSpriteButton.id = 'add_sprite_button';
+        this.buttonsContainer.insertBefore(addSpriteButton, this.buttonsContainer.firstChild);
+    }
+}
+
+var s_cAv = new set_cAv();
+var m_video = new video_stream();
+
+
+// DOM要素のキャッシュ
+const elements = {
+    spriteAddWindow: document.getElementById('SpriteAddWindow'),
+    spriteEditTab: document.getElementById('SpriteEditTab'),
+    helpWindow: document.getElementById('HelpWindow'),
+    buttonEdit: document.getElementById('button_edit'),
+    buttonHelp: document.getElementById('button_help'),
+    buttonFlip: document.getElementById('button_flip'),
+    buttonCamera: document.getElementById('button_camera')
+};
+
+// イベントリスナーの設定
+function setupEventListeners() {
+    Array.from(document.getElementsByClassName('close_add_sprite')).forEach(element => {
+        element.onclick = () => elements.spriteAddWindow.classList.remove('show');
     });
-//各ボタンに対応する処理を追加
-// クリックイベントのハンドラを設定する関数
-function setClickHandler(id, callback) {
-    document.getElementById(id).onclick = callback;
+
+    elements.buttonEdit.onclick = toggleEditTab;
+    elements.buttonSummon.onclick = toggleSummonWindow;
+    elements.buttonHelp.onclick = toggleHelpWindow;
+    elements.buttonFlip.onclick = toggleCamera;
+    elements.buttonCamera.onclick = captureAndDisplayImage;
 }
 
-// クラスを追加/削除する関数
-function toggleClass(id, className) {
-    const element = document.getElementById(id);
-    element.classList.contains(className) ? element.classList.remove(className) : element.classList.add(className);
+// 編集タブの表示切替
+function toggleEditTab() {
+    const displayStyle = elements.spriteEditTab.style.display;
+    elements.spriteEditTab.style.display = displayStyle === 'flex' ? 'none' : 'flex';
+    if (displayStyle === 'flex') {
+        CopilotLS.removeOperableSprite();
+    } else {
+        new SpriteEditTabManager();
+    }
 }
 
-// クリックイベントのハンドラを設定
-setClickHandler('button_help_close', () => document.getElementById('help').classList.remove('show'));
-setClickHandler('button_help', () => document.getElementById('help').classList.add('show'));
-setClickHandler('button_edit', () => toggleClass('edit_tab', 'show'));
-setClickHandler('button_add', () => {
-    document.getElementById('add_sprite').classList.add('show');
-    const AddSpriteWindow = new set_ASW();
-    AddSpriteWindow.eventFilter.onchange = AddSpriteWindow.filterList;
-    AddSpriteWindow.characterFilter.onchange = AddSpriteWindow.filterList;
-    AddSpriteWindow.displayCh(AddSpriteWindow.CharacterDatas);
-});
 
-// 'close_add_sprite'クラスを持つすべての要素に対してハンドラを設定
-Array.from(document.getElementsByClassName('close_add_sprite')).forEach(element => {
-    element.onclick = () => document.getElementById('add_sprite').classList.remove('show');
-});
-let s_cAv = new set_cAv();
-let m_video = new video_stream();
-document.getElementById('button_flip').onclick = function () {
+// ヘルプウィンドウの表示切替
+function toggleHelpWindow() {
+    const displayStyle = elements.helpWindow.style.display;
+    elements.helpWindow.style.display = displayStyle === 'block' ? 'none' : 'block';
+}
+
+// カメラのフリップ
+function toggleCamera() {
     m_video.is_front = !m_video.is_front;
     m_video.syncCamera();
     m_video.initCamera();
 }
-document.getElementById('button_camera').onclick = function () {
-    //canvasとvideoをそれぞれ一時的なcanvasに描画
+
+// 画像のキャプチャと表示
+function captureAndDisplayImage() {
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = s_cAv.canvas.width;
     tempCanvas.height = s_cAv.canvas.height;
     const tempCtx = tempCanvas.getContext('2d');
     tempCtx.drawImage(s_cAv.video, 0, 0, s_cAv.canvas.width, s_cAv.canvas.height);
     tempCtx.drawImage(s_cAv.canvas, 0, 0, s_cAv.canvas.width, s_cAv.canvas.height);
-    //一時的なcanvasを画像に変換
+
     const img = new Image();
     img.src = tempCanvas.toDataURL("image/png");
-    //一時的なcanvasを削除
     tempCanvas.remove();
-    //画像をモーダルで表示
-    const Img_Modal = document.createElement('div');
-    Img_Modal.id = "Img_Modal";
-    Img_Modal.onclick = function () { Img_Modal.remove(); };
-    Img_Modal.appendChild(img);
-    document.body.appendChild(Img_Modal);
+
+    displayModalImage(img);
 }
+
+// 画像モーダルの表示
+function displayModalImage(img) {
+    const imgModal = document.createElement('div');
+    imgModal.id = "Img_Modal";
+    imgModal.onclick = function () { imgModal.remove(); };
+    imgModal.appendChild(img);
+    document.body.appendChild(imgModal);
+}
+
+// イベントリスナーの設定を実行
+setupEventListeners();
