@@ -3,6 +3,7 @@
 <link rel="stylesheet" href="./main.css">
 
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Home</title>
 </head>
 
@@ -61,19 +62,7 @@
         </button>
     </header>
 
-    <div id="SpriteAddWindow">
-        <div id="SpritesFilter">
-            <select id="EventFilter">
-            </select>
-            <select id="CharacterFilter">
-            </select>
-            <button class="close_add_sprite">閉じる</button>
-        </div>
 
-        <div id="SpritesList">
-        </div>
-        <button class="close_add_sprite">閉じる</button>
-    </div>
     <div id="main">
     </div>
     <div id="SpriteEditTab">
@@ -87,6 +76,7 @@
 
     </footer>
 </body>
+<script src="./core_sys/hammer.min.js"></script>
 <script type="module" src="./app.js"></script>
 
 </html>

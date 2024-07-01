@@ -1,6 +1,12 @@
+button {
+  min-width: 22px;
+  min-height: 22px;
+  padding: 10px;
+}
+
 button > img {
-  height: 1em;
-  width: 1em;
+  height: 1.3em;
+  width: 1.3em;
 }
 
 header,
@@ -243,4 +249,9 @@ footer {
   width: auto;
   height: 80%;
 
+}
+@media (max-width: 768px) {
+  html {
+    font-size: 14px; /* スマートフォン向けに少し小さくする */
+  }
 }

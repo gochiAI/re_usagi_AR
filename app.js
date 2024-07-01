@@ -1,41 +1,27 @@
 class LocalStorageUtility {
-    getStorage(key = null) {
-        const data = JSON.parse(localStorage.getItem('sprites_config')) || {};
+    getStorage({ target = 'sprites_config', key }) {
+        const data = JSON.parse(localStorage.getItem(target)) || {};
         return key ? data[key] : data;
     }
-    setStorage(key, value) {
-        const data = this.getStorage();
+
+    setStorage({ target = 'sprites_config', key, value }) {
+        const data = this.getStorage({ target });
         data[key] = value;
-        localStorage.setItem('sprites_config', JSON.stringify(data));
+        localStorage.setItem(target, JSON.stringify(data));
     }
 
-    removeData(key) {
-        const data = this.getStorage();
+    removeStorage({ target = 'sprites_config', key }) {
+        const data = this.getStorage({ target });
         delete data[key];
-        localStorage.setItem('sprites_config', JSON.stringify(data));
+        localStorage.setItem(target, JSON.stringify(data));
     }
 
-    getAllKeys() {
-        return Object.keys(this.getStorage());
-    }
-
-    setOperableSprite(sprite_name) {
-        if (typeof sprite_name === 'string') {
-            localStorage.setItem('operable_sprite', sprite_name);
-        } else {
-            throw new Error('sprite_name must be null or a string');
-        }
-    }
-    removeOperableSprite() {
-        localStorage.removeItem('operable_sprite');
-    }
-    // operable_spriteを取得するメソッド
-    getOperableSprite() {
-        return this.getStorage('operable_sprite') || null;
+    getAllKeys(target = 'sprites_config') {
+        return Object.keys(this.getStorage({ target }));
     }
 }
 
-var CopilotLS = new LocalStorageUtility();
+
 var main = document.getElementById('main');
 var canvas = document.createElement('canvas');
 var video = document.createElement('video');
@@ -55,28 +41,31 @@ class system_data {
 
     Character = ['全て', 'chino', 'cocoa', 'rize', 'chiya', 'syaro', 'maya', 'megu', 'fuyu'];
 }
-class set_cAv {
+class SetCanvasAndVideo {
     constructor() {
-        this.canvas = canvas;
-        this.video = video;
+        this.canvas = document.createElement('canvas');
+        this.video = document.createElement('video');
         this.ctx = this.canvas.getContext('2d');
-        this.set_canvas();
-        this.set_video();
+        this.setCanvas();
+        this.setVideo();
     }
-    get_device_size() {
+
+    getDeviceSize() {
         return {
             width: window.innerWidth,
             height: window.innerHeight
         };
     }
-    set_canvas() {
-        const { width, height } = this.get_device_size();
+
+    setCanvas() {
+        const { width, height } = this.getDeviceSize();
         this.canvas.width = width;
         this.canvas.height = height;
-        main.appendChild(this.canvas);
+        document.getElementById('main').appendChild(this.canvas);
     }
-    set_video() {
-        const { width, height } = this.get_device_size();
+
+    setVideo() {
+        const { width, height } = this.getDeviceSize();
         this.video.width = width;
         this.video.height = height;
         this.video.autoplay = true;
@@ -86,187 +75,104 @@ class set_cAv {
                 width: { ideal: this.video.width },
                 height: { ideal: this.video.height },
                 aspectRatio: { ideal: 16 / 9 },
-                facingMode: "user",
-            },
+                facingMode: "user"
+            }
         };
-
-        main.appendChild(this.video);
+        document.getElementById('main').appendChild(this.video);
     }
 }
-class video_stream {
+class VideoStream {
     constructor() {
-        this.is_front = true;
-        this.video = new set_cAv().video;
-        this.CONSTRAINTS = new set_cAv().CONSTRAINTS || { video: {} };
-        this.curSTREAM = null;
+        this.isFront = true;
+        this.video = s_cAv.video;
+        this.CONSTRAINTS = s_cAv.CONSTRAINTS || { video: {} };
+        this.curStream = null;
         this.initCamera();
         this.syncCamera();
     }
-    syncCamera() {
-        this.CONSTRAINTS.video.facingMode = this.is_front
-            ? "user"
-            : { exact: "environment" };
 
-        if (this.curSTREAM !== null) {
-            this.curSTREAM.getVideoTracks().forEach((camera) => {
-                camera.stop();
-            });
+    syncCamera() {
+        this.CONSTRAINTS.video.facingMode = this.isFront ? "user" : { exact: "environment" };
+        if (this.curStream !== null) {
+            this.curStream.getVideoTracks().forEach(camera => camera.stop());
         }
     }
-    //カメラの初期設定
+
     async initCamera() {
         try {
-            this.curSTREAM = await navigator.mediaDevices.getUserMedia(this.CONSTRAINTS);
-            this.video.srcObject = this.curSTREAM;
-
-            this.video.onloadeddata = (e) => {
-                this.video.play();
-            };
+            this.curStream = await navigator.mediaDevices.getUserMedia(this.CONSTRAINTS);
+            this.video.srcObject = this.curStream;
+            this.video.onloadeddata = () => this.video.play();
         } catch (error) {
             console.error("Error accessing the camera: ", error);
         }
     }
 }
-class chara_sprite {
+
+class CharaSprite {
     constructor(sprite_name) {
-        const spriteData = CopilotLS.getStorage(sprite_name) || {};
+        const spriteData = CopilotLS.getStorage({ key: sprite_name }) || {};
         this.sprite_name = sprite_name;
-        this.src = new get_src().get_thumb_src(sprite_name);
-        this.x = spriteData.X;
-        this.y = spriteData.Y;
-        this.width = get_src().get_stand_size(sprite_name)[0];
-        this.height = get_src().get_stand_size(sprite_name)[1];
-        this.ZoomRate = spriteData.ZoomRate;
+        this.imgInfo = new GetSrc();
+        this.src = this.imgInfo.getStandSrc(this.sprite_name);
+        this.x = spriteData.X || 0;
+        this.y = spriteData.Y || 0;
+        this.ZoomRate = spriteData.ZoomRate || 1;
+        this.width = 0;
+        this.height = 0;
+        this.img = null;
     }
-    set_sprite() {
-        this.img = new Image();
-        this.img.src = this.src;
-        this.img.onload = () => {
-            set_cAv.ctx.drawImage(this.img, this.x, this.y, this.width * this.ZoomRate, this.height * this.ZoomRate);
+
+    async loadSprite() {
+        return new Promise((resolve, reject) => {
+            this.img = new Image();
+            this.img.src = this.src;
+            this.img.onload = () => {
+                this.width = this.img.width;
+                this.height = this.img.height;
+                resolve();
+            };
+            this.img.onerror = reject;
+        });
+    }
+
+    draw(ctx) {
+        if (this.img) {
+            ctx.drawImage(
+                this.img,
+                this.x,
+                this.y,
+                this.width * this.ZoomRate,
+                this.height * this.ZoomRate
+            );
         }
     }
 }
-class get_src {
-    sprite_ID(sprite_name) {
-        if (sprite_name.endsWith("_0")) {
-            sprite_name = sprite_name.replace("_0", ".png");
-        } else {
-            sprite_name = sprite_name + '.png';
-        }
-        return sprite_name;
+
+class GetSrc {
+    spriteID(spriteName) {
+        return spriteName.endsWith("_0") ? spriteName.replace("_0", ".png") : spriteName + '.png';
     }
 
-    get_stand_src(sprite_name) {
-        return `./core_sys/img/stand_sprites/${this.sprite_ID(sprite_name)}`;
+    getStandSrc(spriteName) {
+        return `./core_sys/img/stand_sprites/${this.spriteID(spriteName)}`;
     }
 
-    get_thumb_src(sprite_name) {
-        return `./core_sys/img/thumb_sprites/${this.sprite_ID(sprite_name)}`;
+    getThumbSrc(spriteName) {
+        return `./core_sys/img/thumb_sprites/${this.spriteID(spriteName)}`;
     }
 
-    get_stand_size(sprite_name) {
+    getStandSize(spriteName) {
         return new Promise((resolve, reject) => {
-            var src = this.get_stand_src(sprite_name);
-            var img = new Image();
+            const src = this.getStandSrc(spriteName);
+            const img = new Image();
             img.src = src;
-            img.onload = function () {
-                var width = img.width;
-                var height = img.height;
-                resolve([width, height]);
-            }
+            img.onload = () => resolve([img.width, img.height]);
             img.onerror = reject;
         });
     }
 }
 
-class set_ASW {
-    constructor() {
-        this.CharacterDatas = new system_data().CharacterDatas;
-        this.Events = new system_data().Events;
-        this.Character = new system_data().Character;
-        this.Cards = document.getElementById('SpritesList');
-        this.eventFilter = document.getElementById('Eventfilter');
-        this.characterFilter = document.getElementById('Characterfilter');
-        this.optionCreates(this.eventFilter, this.Events);
-        this.optionCreates(this.characterFilter, this.Character);
-        this.filterList();
-        this.displayCh(this.CharacterDatas);
-    }
-    optionCreates = (f, value) => {
-        value.forEach((v) => {
-            const option = document.createElement('option');
-            option.value = v;
-            option.text = v;
-            f.appendChild(option);
-        });
-    }
-    filterList = () => {
-        const selectedEvent = this.eventFilter.value;
-        const selectedCharacter = this.characterFilter.value;
-
-        const filterList = this.CharacterDatas.filter(sprite_name => {
-            if (selectedEvent === "全て" && selectedCharacter === "全て") return true;
-            if (selectedEvent === "全て") return sprite_name.includes(selectedCharacter);
-            if (selectedCharacter === "全て") return sprite_name.includes(selectedEvent);
-            return sprite_name.includes(selectedEvent) && sprite_name.includes(selectedCharacter);
-        });
-        this.Cards.innerHTML = "";
-        this.displayCh(filterList);
-    }
-    createButton = (iconSrc, onClick) => {
-        const button = document.createElement('button');
-        const icon = document.createElement('img');
-        icon.src = iconSrc;
-        button.appendChild(icon);
-        button.onclick = onClick;
-        return button;
-    }
-    displayCh = (CharacterDatas) => {
-        CharacterDatas.forEach(sprite_name => {
-            const newDiv = document.createElement('div');
-            newDiv.classList.add("SpriteCard");
-
-            const img = document.createElement('img');
-            img.src = new get_src().get_thumb_src(sprite_name);
-
-            newDiv.appendChild(img);
-
-            const CardButtons = document.createElement('div');
-            CardButtons.id = "CardButtons";
-
-            const imgZoom_Button = this.createButton("./core_sys/img/ui/img_zoom.svg", function () {
-                const Img_Modal = document.createElement('div');
-                Img_Modal.id = "Img_Modal";
-                Img_Modal.onclick = function () { Img_Modal.remove(); };
-                const img = document.createElement('img');
-                img.src = new get_src().get_stand_src(sprite_name);
-                Img_Modal.appendChild(img);
-                document.body.appendChild(Img_Modal);
-            });
-
-            const selectSprite_Button = this.createButton(CopilotLS.getStorage(sprite_name) ? "./core_sys/img/ui/user_remove.svg" : "./core_sys/img/ui/user_add.svg", function () {
-                const selectSprite_icon = this.firstChild; // Add this line
-                if (newDiv.classList.contains('selected')) {
-                    selectSprite_icon.src = "./core_sys/img/ui/user_add.svg";
-                    CopilotLS.removeData(sprite_name);
-                    newDiv.classList.remove('selected');
-                } else {
-                    selectSprite_icon.src = "./core_sys/img/ui/user_remove.svg";
-                    CopilotLS.setStorage(sprite_name, { "X": 0, "Y": 0, "ZoomRate": 1.0 });
-                    newDiv.classList.add('selected');
-                }
-            });
-
-            if (CopilotLS.getStorage(sprite_name)) newDiv.classList.add('selected');
-
-            CardButtons.appendChild(imgZoom_Button);
-            CardButtons.appendChild(selectSprite_Button);
-            newDiv.appendChild(CardButtons);
-            this.Cards.appendChild(newDiv);
-        });
-
-    }
-}
 class CharaButton {
     constructor(spriteName) {
         this.spriteName = spriteName;
@@ -284,12 +190,12 @@ class CharaButton {
         const img = new Image();
         img.width = 100;
         img.height = 100;
-        img.src = new get_src().get_thumb_src(this.spriteName);
+        img.src = new GetSrc().getThumbSrc(this.spriteName);
         img.onclick = () => {
-            if (CopilotLS.getOperableSprite() === this.spriteName) {
-                CopilotLS.removeOperableSprite();
+            if (CopilotLS.getStorage({ target: 'operable_sprite', "operable_sprite": this.spriteName }) === this.spriteName) {
+                CopilotLS.removeStorage({ target: 'operable_sprite', "operable_sprite": this.spriteName });
             } else {
-                CopilotLS.setOperableSprite(this.spriteName);
+                CopilotLS.setStorage({ target: 'operable_sprite', key: "operable_sprite", value: this.spriteName });
             }
         };
         this.button.appendChild(img);
@@ -325,15 +231,117 @@ class SpriteEditTabManager {
     addNewSpriteButton() {
         const addSpriteButton = document.createElement('button');
         addSpriteButton.id = 'add_sprite_button';
+        addSpriteButton.onclick = () => {
+            // SpriteAddWindowのインスタンス化と初期化
+            const spriteAddWindow = new SpriteAddWindow();
+            spriteAddWindow.show();
+        };
         this.buttonsContainer.insertBefore(addSpriteButton, this.buttonsContainer.firstChild);
     }
 }
 
-var s_cAv = new set_cAv();
-var m_video = new video_stream();
+
+class SpriteManager {
+    constructor(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.hammer = new Hammer(canvas);
+        this.setupHammerEvents();
+        this.sprites = [];
+        this.selectedSprite = null;
+    }
+
+    setupHammerEvents() {
+        this.hammer.get('pan').set({ direction: Hammer.DIRECTION_ALL });
+        this.hammer.get('pinch').set({ enable: true });
+
+        this.hammer.on('tap', (event) => this.handleTap(event));
+        this.hammer.on('pan', (event) => this.handlePan(event));
+        this.hammer.on('pinch', (event) => this.handlePinch(event));
+    }
+
+    handleTap(event) {
+        const tappedSprite = this.getSpriteAtPosition(event.center.x, event.center.y);
+        if (tappedSprite) {
+            const operableSprite = CopilotLS.getStorage({ target: 'operable_sprite', key: 'operable_sprite' });
+            if (tappedSprite.spriteName === operableSprite) {
+                this.selectedSprite = tappedSprite;
+            } else {
+                this.selectedSprite = null;
+            }
+        } else {
+            this.selectedSprite = null;
+        }
+    }
+
+    handlePan(event) {
+        if (this.selectedSprite) {
+            const spriteConfig = CopilotLS.getStorage({ key: this.selectedSprite.spriteName });
+            spriteConfig.X += event.deltaX;
+            spriteConfig.Y += event.deltaY;
+            CopilotLS.setStorage({ key: this.selectedSprite.spriteName, value: spriteConfig });
+            this.redrawSprites();
+        }
+    }
+
+    handlePinch(event) {
+        if (this.selectedSprite) {
+            const spriteConfig = CopilotLS.getStorage({ key: this.selectedSprite.spriteName });
+            spriteConfig.ZoomRate *= event.scale;
+            CopilotLS.setStorage({ key: this.selectedSprite.spriteName, value: spriteConfig });
+            this.redrawSprites();
+        }
+    }
+
+    getSpriteAtPosition(x, y) {
+        const sprites = CopilotLS.getAllKeys().map(spriteName => {
+            const spriteConfig = CopilotLS.getStorage({ key: spriteName });
+            return new CharaSprite(spriteName, spriteConfig);
+        });
+
+        return sprites.find(sprite => {
+            const spriteConfig = CopilotLS.getStorage({ key: sprite.sprite_name });
+            return x >= spriteConfig.X && x <= spriteConfig.X + sprite.width * spriteConfig.ZoomRate &&
+                y >= spriteConfig.Y && y <= spriteConfig.Y + sprite.height * spriteConfig.ZoomRate;
+        }) || null;
+    }
+
+    redrawSprites() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        CopilotLS.getAllKeys().forEach(spriteName => {
+            const spriteConfig = CopilotLS.getStorage({ key: spriteName });
+            const sprite = new CharaSprite(spriteName);
+            sprite.x = spriteConfig.X;
+            sprite.y = spriteConfig.Y;
+            sprite.ZoomRate = spriteConfig.ZoomRate;
+            sprite.set_sprite();
+        });
+    }
+    async loadAllSprites() {
+        const spriteNames = CopilotLS.getAllKeys();
+        this.sprites = spriteNames.map(name => new CharaSprite(name));
+        await Promise.all(this.sprites.map(sprite => sprite.loadSprite()));
+    }
+
+    drawAllSprites() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.sprites.forEach(sprite => sprite.draw(this.ctx));
+    }
+}
+const CopilotLS = new LocalStorageUtility();
+const s_cAv = new SetCanvasAndVideo();
+const m_video = new VideoStream();
+const spriteManager = new SpriteManager(s_cAv.canvas);
+
+async function initializeSprites() {
+    await spriteManager.loadAllSprites();
+    spriteManager.drawAllSprites();
+}
+initializeSprites();
 
 
-// DOM要素のキャッシュ
+
+// DOM elements cache
 const elements = {
     spriteAddWindow: document.getElementById('SpriteAddWindow'),
     spriteEditTab: document.getElementById('SpriteEditTab'),
@@ -343,46 +351,36 @@ const elements = {
     buttonFlip: document.getElementById('button_flip'),
     buttonCamera: document.getElementById('button_camera')
 };
-
-// イベントリスナーの設定
 function setupEventListeners() {
     Array.from(document.getElementsByClassName('close_add_sprite')).forEach(element => {
         element.onclick = () => elements.spriteAddWindow.classList.remove('show');
     });
-
     elements.buttonEdit.onclick = toggleEditTab;
-    elements.buttonSummon.onclick = toggleSummonWindow;
     elements.buttonHelp.onclick = toggleHelpWindow;
     elements.buttonFlip.onclick = toggleCamera;
     elements.buttonCamera.onclick = captureAndDisplayImage;
 }
 
-// 編集タブの表示切替
 function toggleEditTab() {
     const displayStyle = elements.spriteEditTab.style.display;
     elements.spriteEditTab.style.display = displayStyle === 'flex' ? 'none' : 'flex';
     if (displayStyle === 'flex') {
-        CopilotLS.removeOperableSprite();
+        CopilotLS.removeStorage({ target: 'operable_sprite' });
     } else {
         new SpriteEditTabManager();
     }
 }
 
-
-// ヘルプウィンドウの表示切替
 function toggleHelpWindow() {
     const displayStyle = elements.helpWindow.style.display;
     elements.helpWindow.style.display = displayStyle === 'block' ? 'none' : 'block';
 }
 
-// カメラのフリップ
 function toggleCamera() {
-    m_video.is_front = !m_video.is_front;
+    m_video.isFront = !m_video.isFront;
     m_video.syncCamera();
     m_video.initCamera();
 }
-
-// 画像のキャプチャと表示
 function captureAndDisplayImage() {
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = s_cAv.canvas.width;
@@ -390,22 +388,19 @@ function captureAndDisplayImage() {
     const tempCtx = tempCanvas.getContext('2d');
     tempCtx.drawImage(s_cAv.video, 0, 0, s_cAv.canvas.width, s_cAv.canvas.height);
     tempCtx.drawImage(s_cAv.canvas, 0, 0, s_cAv.canvas.width, s_cAv.canvas.height);
-
     const img = new Image();
     img.src = tempCanvas.toDataURL("image/png");
+    CopilotLS.setStorage({ target: 'captured_image', key: 'captured_image', value: img.src });
     tempCanvas.remove();
-
     displayModalImage(img);
 }
 
-// 画像モーダルの表示
 function displayModalImage(img) {
     const imgModal = document.createElement('div');
     imgModal.id = "Img_Modal";
-    imgModal.onclick = function () { imgModal.remove(); };
+    imgModal.onclick = () => imgModal.remove();
     imgModal.appendChild(img);
     document.body.appendChild(imgModal);
 }
 
-// イベントリスナーの設定を実行
 setupEventListeners();
