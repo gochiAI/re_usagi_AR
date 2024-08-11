@@ -1,6 +1,16 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
 button {
-  min-width: 22px;
-  min-height: 22px;
+  min-width: 40px;
+  min-height: 40px;
   padding: 10px;
 }
 
@@ -23,88 +33,94 @@ footer,
 #button_flip {
   position: absolute;
 }
+
 header {
   width: 100%;
   top: 0;
   left: 0;
-  z-index: 1;
+  z-index: 2;
 }
+
 #service_logo {
-  height: 50px;
+  height: 40px;
   padding: 4px;
   top: 0;
-  /*常に画面の中央に配置*/
   left: 50%;
   transform: translateX(-50%);
 }
 
 #HelpWindow {
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  -ms-overflow-style: none;
-  overflow-y: scroll;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
   top: 0;
   right: 0;
-
   background-color: aliceblue;
   display: none;
   z-index: 1;
 }
-#HelpWindow::-webkit-scrollbar {
-  display: none;
-}
+
 #HelpContent {
   position: relative;
-  margin: 50px;
-
+  margin: 20px;
   background-color: aliceblue;
 }
+
 #button_help {
-  max-width: calc(100vw - 80px);
   padding: 4px;
   top: 10px;
   right: 10px;
 }
 
-canvas {
+canvas, video {
   top: 0;
   left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+canvas {
   z-index: 0;
 }
+
 video {
-  top: 0;
-  left: 0;
   z-index: -1;
 }
 
 #SpriteEditTab {
   width: 100%;
-  bottom: 8%;
+  bottom: 60px;
   left: 0;
-
   background-color: aliceblue;
   display: none;
-
   z-index: 1;
+  overflow-x: auto;
+  white-space: nowrap;
 }
-
 
 footer {
   width: 100%;
-
   bottom: 0;
   left: 0;
   z-index: 0;
 }
 
-/* Button Postison */
-
-#button_edit {
-  max-width: calc(100vw - 80px);
+#button_edit, #button_camera, #button_flip {
   padding: 4px;
   bottom: 10px;
+}
+
+#button_edit {
   left: 10px;
+}
+
+#button_camera {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+#button_flip {
+  right: 10px;
 }
 
 .accordion {
@@ -128,32 +144,19 @@ footer {
   max-height: 1000px;
 }
 
-#button_camera {
-  max-width: calc(100vw - 80px);
-  padding: 4px;
-  bottom: 10px;
-  left: 50%;
-  right: auto;
-}
-
-#button_flip {
-  max-width: calc(100vw - 80px);
-  padding: 4px;
-  bottom: 10px;
-  right: 10px;
-}
-
 #SpriteEditTab {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  overflow-x: auto;
 }
 
 #SpriteEditTab button {
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
   margin: 2px;
   padding: 2px;
+  flex-shrink: 0;
 }
 
 #SpriteEditTab #SpriteAddWindow {
@@ -163,7 +166,6 @@ footer {
 
 #SpriteEditTab button.selected {
   border-color: blue;
-  /* 選択されたボタンを強調表示 */
 }
 
 #SpriteEditTab img {
@@ -174,61 +176,35 @@ footer {
 
 #SpriteAddWindow {
   display: none;
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background-color: sandybrown;
   z-index: 2;
+  overflow-y: auto;
 }
 
-#SpritesList {
-  display: flex;
-  max-height: 80vh;
-  overflow-y: scroll;
 
-  justify-content: space-evenly;
-  width: 90%;
-  flex-wrap: wrap;
-  padding: 10px 10px;
-  margin: 10px;
-}
-
-.SpriteCard {
-  border: 4px solid #000;
-  width: 150px;
-  height: 150px;
-  margin: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-}
-
-.SpriteCard.selected {
-  border: 4px dashed blue;
-}
-
-.SpriteCard img {
-  width: 80%;
-  height: 80%;
-  object-fit: cover;
-}
 
 .close_add_sprite {
-  /*画面中央*/
   position: relative;
   left: 50%;
+  transform: translateX(-50%);
+  margin: 10px 0;
 }
 
 #CardButtons {
   position: absolute;
   bottom: 5px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 #CardButtons button {
-  margin: 0px 5px;
+  margin: 0 5px;
 }
 
 #Img_Modal {
@@ -239,19 +215,48 @@ footer {
   height: 100%;
   background-color: rgba(255, 255, 255, 0.5);
   display: flex;
-
   justify-content: center;
   align-items: center;
   z-index: 3;
 }
 
 #Img_Modal img {
-  width: auto;
-  height: 80%;
-
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
 }
-@media (max-width: 768px) {
-  html {
-    font-size: 14px; /* スマートフォン向けに少し小さくする */
+
+.chara_card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 5px;
+  padding: 5px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  width: 10%;
+}
+
+.sprite-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 5px;
+}
+
+.button-container button {
+  padding: 5px;
+  font-size: 0.9em;
+}
+
+@media (max-width: 480px) {
+  .chara_card {
+    width: auto
   }
 }
