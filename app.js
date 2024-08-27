@@ -44,6 +44,7 @@ class SetCanvasAndVideo {
         this.ctx = this.canvas.getContext('2d');
         this.setCanvas();
         this.setVideo();
+
     }
 
     getDeviceSize() {
@@ -83,6 +84,7 @@ class VideoStream extends SetCanvasAndVideo {
         super();
         this.isFront = true;
         this.curStream = null;
+        
         this.initCamera();
         this.syncCamera();
     }
@@ -134,9 +136,10 @@ class GetSrc extends CopilotLS {
 }
 
 class CharaButton extends GetSrc {
-    constructor(spriteName) {
+    constructor(spriteName,onToggle) {
         super();
         this.spriteName = spriteName;
+        this.onToggle = onToggle;
         this.card = this.createCard();
     }
 
@@ -160,7 +163,7 @@ class CharaButton extends GetSrc {
 
         const selectButton = document.createElement('button');
         selectButton.innerText = "選択";
-        selectButton.onclick = () => this.selectSprite(card);
+        selectButton.onclick = () => this.toggleSpriteSelection(card);
         buttonContainer.appendChild(selectButton);
 
         card.appendChild(buttonContainer);
@@ -170,7 +173,7 @@ class CharaButton extends GetSrc {
 
     enlargeSprite() {
         const fullImageSrc = this.getStandSrc(this.spriteName);
-        
+
         const overlay = document.createElement('div');
         overlay.id = 'Img_Modal';
         const fullImage = new Image();
@@ -186,17 +189,24 @@ class CharaButton extends GetSrc {
         document.body.appendChild(overlay);
     }
 
-    selectSprite(card) {
-        const selectedSprites = CopilotLS.getStorage({ target: 'selected_sprites', key: "selected_sprites" }) || [];
-        const spriteIndex = selectedSprites.indexOf(this.spriteName);
-        if (spriteIndex > -1) {
-            selectedSprites.splice(spriteIndex, 1);
-            card.style.borderColor = '#ccc';
+    toggleSpriteSelection() {
+        const spriteNames = CopilotLS.getAllKeys('sprites_config');
+        if (!spriteNames.includes(this.spriteName)) {
+            CopilotLS.setStorage({ target: 'sprites_config', key: this.spriteName, value: { X: 0, Y: 0, ZoomRate: 1 } });
+            this.card.style.borderColor = 'red';
         } else {
-            selectedSprites.push(this.spriteName);
-            card.style.borderColor = 'red';
+            CopilotLS.removeStorage({ target: 'sprites_config', key: this.spriteName });
+            this.card.style.borderColor = '#ccc';
         }
-        CopilotLS.setStorage({ target: 'selected_sprites', key: "selected_sprites", value: selectedSprites });
+        
+        if (this.onToggle) {
+            this.onToggle(this.spriteName);
+        }
+    }
+
+    updateSelectionStyle() {
+        const spriteNames = CopilotLS.getAllKeys('sprites_config');
+        this.card.style.borderColor = spriteNames.includes(this.spriteName) ? 'red' : '#ccc';
     }
 
     getCard() {
@@ -212,8 +222,8 @@ class SpriteEditTabManager extends GetSrc {
 
     initializeButtons() {
         this.clearButtons();
-        const selectedSprites = CopilotLS.getStorage({ target: 'selected_sprites', key: "selected_sprites" }) || [];
-        selectedSprites.forEach(spriteName => {
+        const spriteNames = CopilotLS.getAllKeys('sprites_config');
+        spriteNames.forEach(spriteName => {
             const spriteButton = this.createSpriteButton(spriteName);
             this.buttonsContainer.appendChild(spriteButton);
         });
@@ -317,54 +327,71 @@ class SpriteManager {
     constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
-        this.hammer = new Hammer(canvas);
-        this.setupHammerEvents();
         this.sprites = [];
         this.selectedSprite = null;
+        this.isTouching = false;
+        this.lastTouch = null;
         this.loadAllSprites().then(() => this.drawAllSprites());
-
-        // PCのクリックイベントを追加
-        this.canvas.addEventListener('click', (event) => this.handleClick(event));
+        this.setupTouchEvents();
     }
 
-    setupHammerEvents() {
-        this.hammer.get('pan').set({ direction: Hammer.DIRECTION_ALL });
-        this.hammer.get('pinch').set({ enable: true });
+    setupTouchEvents() {
+        this.canvas.addEventListener('mousedown', (event) => this.handleTouchStart(event), { passive: false });
+        this.canvas.addEventListener('mousemove', (event) => this.handleTouchMove(event), { passive: false });
+        this.canvas.addEventListener('mouseup', () => this.handleTouchEnd(), { passive: false });
 
-        this.hammer.on('tap', (event) => this.handleTap(event));
-        this.hammer.on('pan', (event) => this.handlePan(event));
-        // ピンチイベントはPCでは不要なので削除
+        this.canvas.addEventListener('touchstart', (event) => this.handleTouchStart(event), { passive: false });
+        this.canvas.addEventListener('touchmove', (event) => this.handleTouchMove(event), { passive: false });
+        this.canvas.addEventListener('touchend', () => this.handleTouchEnd(), { passive: false });
+        console.info("タッチイベントがセットアップされました。");
     }
 
-    handleClick(event) {
-        const rect = this.canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        this.handleTap({ center: { x, y } });
-    }
+    handleTouchStart(event) {
+        event.preventDefault();
+        const touch = event.touches ? event.touches[0] : event;
+        console.info("タッチ開始。座標:", touch.clientX, touch.clientY);
 
-    handleTap(event) {
-        const tappedSprite = this.getSpriteAtPosition(event.center.x, event.center.y);
+        const tappedSprite = this.getSpriteAtPosition(touch.clientX, touch.clientY);
         const operableSprite = CopilotLS.getStorage({ target: 'operable_sprite', key: 'operable_sprite' });
+        const isEditTabOpen = document.getElementById('SpriteEditTab').style.display === 'flex';
 
-        if (tappedSprite && tappedSprite.sprite_name === operableSprite) {
+        if (tappedSprite && (isEditTabOpen && tappedSprite.sprite_name === operableSprite)) {
             this.selectedSprite = tappedSprite;
+            this.isTouching = true;
+            this.lastTouch = touch;
+            console.info("選択されたスプライト:", this.selectedSprite.sprite_name);
         } else {
             this.selectedSprite = null;
+            console.info("選択されたスプライトはありません。");
         }
     }
 
-    handlePan(event) {
-        if (this.selectedSprite) {
-            const operableSprite = CopilotLS.getStorage({ target: 'operable_sprite', key: 'operable_sprite' });
-            if (this.selectedSprite.sprite_name === operableSprite) {
-                const spriteConfig = CopilotLS.getStorage({ key: this.selectedSprite.sprite_name });
-                spriteConfig.X += event.deltaX;
-                spriteConfig.Y += event.deltaY;
-                CopilotLS.setStorage({ key: this.selectedSprite.sprite_name, value: spriteConfig });
-                this.redrawSprites();
-            }
+    handleTouchMove(event) {
+        event.preventDefault();
+        if (this.isTouching && this.selectedSprite) {
+            const touch = event.touches ? event.touches[0] : event;
+            const deltaX = touch.clientX - this.lastTouch.clientX;
+            const deltaY = touch.clientY - this.lastTouch.clientY;
+
+            const spriteConfig = CopilotLS.getStorage({ target: 'sprites_config', key: this.selectedSprite.sprite_name }) || {};
+            spriteConfig.X = (spriteConfig.X || 0) + deltaX;
+            spriteConfig.Y = (spriteConfig.Y || 0) + deltaY;
+            CopilotLS.setStorage({ target: 'sprites_config', key: this.selectedSprite.sprite_name, value: spriteConfig });
+
+            this.selectedSprite.x = spriteConfig.X;
+            this.selectedSprite.y = spriteConfig.Y;
+
+            this.redrawSprites();
+
+            this.lastTouch = touch;
+            console.info("スプライトの新しい位置:", spriteConfig.X, spriteConfig.Y);
         }
+    }
+
+    handleTouchEnd() {
+        this.isTouching = false;
+        this.selectedSprite = null;
+        console.info("タッチ終了。");
     }
 
     getSpriteAtPosition(x, y) {
@@ -380,9 +407,17 @@ class SpriteManager {
     }
 
     async loadAllSprites() {
-        const spriteNames = CopilotLS.getAllKeys();
-        this.sprites = spriteNames.map(name => new CharaSprite(name));
-        await Promise.all(this.sprites.map(sprite => sprite.loadSprite()));
+        const spriteNames = CopilotLS.getAllKeys('sprites_config');
+        this.sprites = await Promise.all(spriteNames.map(async name => {
+            const spriteConfig = CopilotLS.getStorage({ target: 'sprites_config', key: name }) || {};
+            const sprite = new CharaSprite(name);
+            sprite.x = spriteConfig.X || 0;
+            sprite.y = spriteConfig.Y || 0;
+            sprite.ZoomRate = spriteConfig.ZoomRate || 1;
+            await sprite.loadSprite();
+            return sprite;
+        }));
+        console.info("スプライトがロードされました:", this.sprites.map(sprite => sprite.sprite_name));
     }
 
     drawAllSprites() {
@@ -470,7 +505,7 @@ class SpriteAddWindow extends CopilotLS {
         this.filteredData = this.characterDatas.filter(data => {
             const [event, character] = data.split('/');
             return (eventFilter === '全て' || event === eventFilter) &&
-                   (characterFilter === '全て' || character.includes(characterFilter));
+                (characterFilter === '全て' || character.includes(characterFilter));
         });
 
         this.renderSprites();
@@ -478,12 +513,12 @@ class SpriteAddWindow extends CopilotLS {
 
     renderSprites() {
         this.spriteContainer.innerHTML = '';
-        const selectedSprites = CopilotLS.getStorage({ target: 'selected_sprites', key: "selected_sprites" }) || [];
         this.filteredData.forEach(spriteName => {
-            const spriteCard = new CharaButton(spriteName);
-            if (selectedSprites.includes(spriteName)) {
-                spriteCard.getCard().style.borderColor = 'red';
-            }
+            const spriteCard = new CharaButton(spriteName, () => {
+                initializeSprites(); // スプライトを再描画
+                this.renderSprites(); // スプライトのリストを再描画
+            });
+            spriteCard.updateSelectionStyle(); // 選択状態を反映
             this.spriteContainer.appendChild(spriteCard.getCard());
         });
     }
@@ -501,13 +536,12 @@ class SpriteAddWindow extends CopilotLS {
         initializeSprites();
     }
 }
-const s_cAv = new SetCanvasAndVideo();
+
 const m_video = new VideoStream();
-const spriteManager = new SpriteManager(s_cAv.canvas);
+const spriteManager = new SpriteManager(document.getElementsByTagName('canvas')[0]);
 
 async function initializeSprites() {
-    const selectedSprites = CopilotLS.getStorage({ target: 'selected_sprites', key: "selected_sprites" }) || [];
-    spriteManager.sprites = selectedSprites.map(name => new CharaSprite(name));
+    spriteManager.sprites = CopilotLS.getAllKeys('sprites_config').map(name => new CharaSprite(name));
     await Promise.all(spriteManager.sprites.map(sprite => sprite.loadSprite()));
     spriteManager.drawAllSprites();
 }
