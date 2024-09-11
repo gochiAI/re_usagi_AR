@@ -352,24 +352,27 @@ class SpriteManager {
     handleTouchStart(event) {
         event.preventDefault();
         const isEditTabOpen = document.getElementById('SpriteEditTab').style.display === 'flex';
-
-        if (event.touches.length === 2 && isEditTabOpen) {
-            const touch1 = event.touches[0];
-            const touch2 = event.touches[1];
-            this.initialDistance = this.getDistance(touch1, touch2);
-            const centerX = (touch1.clientX + touch2.clientX) / 2;
-            const centerY = (touch1.clientY + touch2.clientY) / 2;
-            this.selectedSprite = this.getSpriteAtPosition(centerX, centerY);
-            if (this.selectedSprite) {
-                this.initialZoom = this.selectedSprite.ZoomRate;
+        if (event.type === 'touchstart') {
+            // タッチイベントの処理
+            if (event.touches.length === 2 && isEditTabOpen) {
+                const touch1 = event.touches[0];
+                const touch2 = event.touches[1];
+                this.initialDistance = this.getDistance(touch1, touch2);
+                const centerX = (touch1.clientX + touch2.clientX) / 2;
+                const centerY = (touch1.clientY + touch2.clientY) / 2;
+                this.selectedSprite = this.getSpriteAtPosition(centerX, centerY);
+                if (this.selectedSprite) {
+                    this.initialZoom = this.selectedSprite.ZoomRate;
+                }
             }
-        } else {
+        }
+        else {
             const touch = event.touches ? event.touches[0] : event;
 
 
             const tappedSprite = this.getSpriteAtPosition(touch.clientX, touch.clientY);
             const operableSprite = CopilotLS.getStorage({ target: 'operable_sprite', key: 'operable_sprite' });
-            
+
 
             if (tappedSprite && (isEditTabOpen && tappedSprite.sprite_name === operableSprite)) {
                 this.selectedSprite = tappedSprite;
@@ -385,22 +388,25 @@ class SpriteManager {
 
     handleTouchMove(event) {
         event.preventDefault();
-        if (event.touches.length === 2 && this.selectedSprite) {
-            const touch1 = event.touches[0];
-            const touch2 = event.touches[1];
-            const currentDistance = this.getDistance(touch1, touch2);
-            const scale = currentDistance / this.initialDistance;
-            const newZoom = this.initialZoom * scale;
+        if (event.type === 'touchstart') {
+            if (event.touches.length === 2 && this.selectedSprite) {
+                const touch1 = event.touches[0];
+                const touch2 = event.touches[1];
+                const currentDistance = this.getDistance(touch1, touch2);
+                const scale = currentDistance / this.initialDistance;
+                const newZoom = this.initialZoom * scale;
 
-            // ズーム率の制限（例: 0.5倍から2倍まで）
-            this.selectedSprite.ZoomRate = Math.max(0.5, Math.min(2, newZoom));
+                // ズーム率の制限（例: 0.5倍から2倍まで）
+                this.selectedSprite.ZoomRate = Math.max(0.5, Math.min(2, newZoom));
 
-            const spriteConfig = CopilotLS.getStorage({ target: 'sprites_config', key: this.selectedSprite.sprite_name }) || {};
-            spriteConfig.ZoomRate = this.selectedSprite.ZoomRate;
-            CopilotLS.setStorage({ target: 'sprites_config', key: this.selectedSprite.sprite_name, value: spriteConfig });
+                const spriteConfig = CopilotLS.getStorage({ target: 'sprites_config', key: this.selectedSprite.sprite_name }) || {};
+                spriteConfig.ZoomRate = this.selectedSprite.ZoomRate;
+                CopilotLS.setStorage({ target: 'sprites_config', key: this.selectedSprite.sprite_name, value: spriteConfig });
 
-            this.redrawSprites();
-        } else {
+                this.redrawSprites();
+            }
+        }
+        else {
             const touch = event.touches ? event.touches[0] : event;
             const deltaX = touch.clientX - this.lastTouch.clientX;
             const deltaY = touch.clientY - this.lastTouch.clientY;
