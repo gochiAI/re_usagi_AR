@@ -42,6 +42,8 @@ class SetCanvasAndVideo {
         this.canvas = document.createElement('canvas');
         this.video = document.createElement('video');
         this.ctx = this.canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
         this.setCanvas();
         this.setVideo();
 
@@ -349,7 +351,9 @@ class SpriteManager {
 
     handleTouchStart(event) {
         event.preventDefault();
-        if (event.touches.length === 2) {
+        const isEditTabOpen = document.getElementById('SpriteEditTab').style.display === 'flex';
+
+        if (event.touches.length === 2 && isEditTabOpen) {
             const touch1 = event.touches[0];
             const touch2 = event.touches[1];
             this.initialDistance = this.getDistance(touch1, touch2);
@@ -365,7 +369,7 @@ class SpriteManager {
 
             const tappedSprite = this.getSpriteAtPosition(touch.clientX, touch.clientY);
             const operableSprite = CopilotLS.getStorage({ target: 'operable_sprite', key: 'operable_sprite' });
-            const isEditTabOpen = document.getElementById('SpriteEditTab').style.display === 'flex';
+            
 
             if (tappedSprite && (isEditTabOpen && tappedSprite.sprite_name === operableSprite)) {
                 this.selectedSprite = tappedSprite;
@@ -450,7 +454,7 @@ class SpriteManager {
             await sprite.loadSprite();
             return sprite;
         }));
-      
+
     }
 
     drawAllSprites() {
