@@ -384,6 +384,9 @@ class SpriteManager {
 
     handleTouchMove(event) {
         event.preventDefault();
+        if(!this.isTouching || !this.selectedSprite){
+            return;
+        }
         if (isMobile) {
             if (event.touches.length === 2 && this.selectedSprite) {
                 const touch1 = event.touches[0];
@@ -403,6 +406,9 @@ class SpriteManager {
             }
         }
         else {
+            if(!this.lastTouch){
+                return;
+            }
             const touch = event.touches ? event.touches[0] : event;
             const deltaX = touch.clientX - this.lastTouch.clientX;
             const deltaY = touch.clientY - this.lastTouch.clientY;
