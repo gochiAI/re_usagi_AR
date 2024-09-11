@@ -84,7 +84,7 @@ class VideoStream extends SetCanvasAndVideo {
         super();
         this.isFront = true;
         this.curStream = null;
-        
+
         this.initCamera();
         this.syncCamera();
     }
@@ -136,7 +136,7 @@ class GetSrc extends CopilotLS {
 }
 
 class CharaButton extends GetSrc {
-    constructor(spriteName,onToggle) {
+    constructor(spriteName, onToggle) {
         super();
         this.spriteName = spriteName;
         this.onToggle = onToggle;
@@ -192,13 +192,13 @@ class CharaButton extends GetSrc {
     toggleSpriteSelection() {
         const spriteNames = CopilotLS.getAllKeys('sprites_config');
         if (!spriteNames.includes(this.spriteName)) {
-            CopilotLS.setStorage({ target: 'sprites_config', key: this.spriteName, value: { X: 0, Y: 0, ZoomRate: 1 } });
+            CopilotLS.setStorage({ target: 'sprites_config', key: this.spriteName, value: { X: 0, Y: 0, ZoomRate: 0.6 } });
             this.card.style.borderColor = 'red';
         } else {
             CopilotLS.removeStorage({ target: 'sprites_config', key: this.spriteName });
             this.card.style.borderColor = '#ccc';
         }
-        
+
         if (this.onToggle) {
             this.onToggle(this.spriteName);
         }
@@ -331,6 +331,8 @@ class SpriteManager {
         this.selectedSprite = null;
         this.isTouching = false;
         this.lastTouch = null;
+        this.initialDistance = 0;
+        this.initialZoom = 1;
         this.loadAllSprites().then(() => this.drawAllSprites());
         this.setupTouchEvents();
     }
@@ -343,32 +345,58 @@ class SpriteManager {
         this.canvas.addEventListener('touchstart', (event) => this.handleTouchStart(event), { passive: false });
         this.canvas.addEventListener('touchmove', (event) => this.handleTouchMove(event), { passive: false });
         this.canvas.addEventListener('touchend', () => this.handleTouchEnd(), { passive: false });
-        console.info("タッチイベントがセットアップされました。");
     }
 
     handleTouchStart(event) {
         event.preventDefault();
-        const touch = event.touches ? event.touches[0] : event;
-        console.info("タッチ開始。座標:", touch.clientX, touch.clientY);
-
-        const tappedSprite = this.getSpriteAtPosition(touch.clientX, touch.clientY);
-        const operableSprite = CopilotLS.getStorage({ target: 'operable_sprite', key: 'operable_sprite' });
-        const isEditTabOpen = document.getElementById('SpriteEditTab').style.display === 'flex';
-
-        if (tappedSprite && (isEditTabOpen && tappedSprite.sprite_name === operableSprite)) {
-            this.selectedSprite = tappedSprite;
-            this.isTouching = true;
-            this.lastTouch = touch;
-            console.info("選択されたスプライト:", this.selectedSprite.sprite_name);
+        if (event.touches.length === 2) {
+            const touch1 = event.touches[0];
+            const touch2 = event.touches[1];
+            this.initialDistance = this.getDistance(touch1, touch2);
+            const centerX = (touch1.clientX + touch2.clientX) / 2;
+            const centerY = (touch1.clientY + touch2.clientY) / 2;
+            this.selectedSprite = this.getSpriteAtPosition(centerX, centerY);
+            if (this.selectedSprite) {
+                this.initialZoom = this.selectedSprite.ZoomRate;
+            }
         } else {
-            this.selectedSprite = null;
-            console.info("選択されたスプライトはありません。");
+            const touch = event.touches ? event.touches[0] : event;
+
+
+            const tappedSprite = this.getSpriteAtPosition(touch.clientX, touch.clientY);
+            const operableSprite = CopilotLS.getStorage({ target: 'operable_sprite', key: 'operable_sprite' });
+            const isEditTabOpen = document.getElementById('SpriteEditTab').style.display === 'flex';
+
+            if (tappedSprite && (isEditTabOpen && tappedSprite.sprite_name === operableSprite)) {
+                this.selectedSprite = tappedSprite;
+                this.isTouching = true;
+                this.lastTouch = touch;
+
+            } else {
+                this.selectedSprite = null;
+
+            }
         }
     }
 
     handleTouchMove(event) {
         event.preventDefault();
-        if (this.isTouching && this.selectedSprite) {
+        if (event.touches.length === 2 && this.selectedSprite) {
+            const touch1 = event.touches[0];
+            const touch2 = event.touches[1];
+            const currentDistance = this.getDistance(touch1, touch2);
+            const scale = currentDistance / this.initialDistance;
+            const newZoom = this.initialZoom * scale;
+
+            // ズーム率の制限（例: 0.5倍から2倍まで）
+            this.selectedSprite.ZoomRate = Math.max(0.5, Math.min(2, newZoom));
+
+            const spriteConfig = CopilotLS.getStorage({ target: 'sprites_config', key: this.selectedSprite.sprite_name }) || {};
+            spriteConfig.ZoomRate = this.selectedSprite.ZoomRate;
+            CopilotLS.setStorage({ target: 'sprites_config', key: this.selectedSprite.sprite_name, value: spriteConfig });
+
+            this.redrawSprites();
+        } else {
             const touch = event.touches ? event.touches[0] : event;
             const deltaX = touch.clientX - this.lastTouch.clientX;
             const deltaY = touch.clientY - this.lastTouch.clientY;
@@ -384,14 +412,15 @@ class SpriteManager {
             this.redrawSprites();
 
             this.lastTouch = touch;
-            console.info("スプライトの新しい位置:", spriteConfig.X, spriteConfig.Y);
+
+
         }
     }
 
     handleTouchEnd() {
         this.isTouching = false;
         this.selectedSprite = null;
-        console.info("タッチ終了。");
+
     }
 
     getSpriteAtPosition(x, y) {
@@ -405,7 +434,11 @@ class SpriteManager {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.sprites.forEach(sprite => sprite.draw(this.ctx));
     }
-
+    getDistance(touch1, touch2) {
+        const dx = touch1.clientX - touch2.clientX;
+        const dy = touch1.clientY - touch2.clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
     async loadAllSprites() {
         const spriteNames = CopilotLS.getAllKeys('sprites_config');
         this.sprites = await Promise.all(spriteNames.map(async name => {
@@ -417,7 +450,7 @@ class SpriteManager {
             await sprite.loadSprite();
             return sprite;
         }));
-        console.info("スプライトがロードされました:", this.sprites.map(sprite => sprite.sprite_name));
+      
     }
 
     drawAllSprites() {
