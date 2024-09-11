@@ -42,8 +42,8 @@ class SetCanvasAndVideo {
         this.canvas = document.createElement('canvas');
         this.video = document.createElement('video');
         this.ctx = this.canvas.getContext('2d');
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
+        this.ctx.imageSmoothingEnabled = true;
+        this.ctx.imageSmoothingQuality = 'high';
         this.setCanvas();
         this.setVideo();
 
