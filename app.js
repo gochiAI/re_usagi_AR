@@ -1,3 +1,6 @@
+var isMobile = /(iPhone|Android|Mobile)/i.test(navigator.userAgent);
+var is_PC = /(PC)/i.test(navigator.userAgent);
+
 class CopilotLS {
     static getStorage({ target = 'sprites_config', key }) {
         const data = JSON.parse(localStorage.getItem(target)) || {};
@@ -352,8 +355,7 @@ class SpriteManager {
     handleTouchStart(event) {
         event.preventDefault();
         const isEditTabOpen = document.getElementById('SpriteEditTab').style.display === 'flex';
-        if (event.type === 'touchstart') {
-            // タッチイベントの処理
+        if (isMobile) {
             if (event.touches.length === 2 && isEditTabOpen) {
                 const touch1 = event.touches[0];
                 const touch2 = event.touches[1];
@@ -368,27 +370,21 @@ class SpriteManager {
         }
         else {
             const touch = event.touches ? event.touches[0] : event;
-
-
             const tappedSprite = this.getSpriteAtPosition(touch.clientX, touch.clientY);
             const operableSprite = CopilotLS.getStorage({ target: 'operable_sprite', key: 'operable_sprite' });
-
-
             if (tappedSprite && (isEditTabOpen && tappedSprite.sprite_name === operableSprite)) {
                 this.selectedSprite = tappedSprite;
                 this.isTouching = true;
                 this.lastTouch = touch;
-
             } else {
                 this.selectedSprite = null;
-
             }
         }
     }
 
     handleTouchMove(event) {
         event.preventDefault();
-        if (event.type === 'touchstart') {
+        if (isMobile) {
             if (event.touches.length === 2 && this.selectedSprite) {
                 const touch1 = event.touches[0];
                 const touch2 = event.touches[1];
@@ -397,7 +393,7 @@ class SpriteManager {
                 const newZoom = this.initialZoom * scale;
 
                 // ズーム率の制限（例: 0.5倍から2倍まで）
-                this.selectedSprite.ZoomRate = Math.max(0.5, Math.min(2, newZoom));
+                this.selectedSprite.ZoomRate = Math.max(0.2, Math.min(2, newZoom));
 
                 const spriteConfig = CopilotLS.getStorage({ target: 'sprites_config', key: this.selectedSprite.sprite_name }) || {};
                 spriteConfig.ZoomRate = this.selectedSprite.ZoomRate;
