@@ -81,7 +81,7 @@ canvas, video {
 
 canvas {
   z-index: 0;
-  image-rendering: pixelated;
+
 }
 
 video {

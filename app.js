@@ -368,23 +368,22 @@ class SpriteManager {
                 }
             }
         }
-        else {
-            const touch = event.touches ? event.touches[0] : event;
-            const tappedSprite = this.getSpriteAtPosition(touch.clientX, touch.clientY);
-            const operableSprite = CopilotLS.getStorage({ target: 'operable_sprite', key: 'operable_sprite' });
-            if (tappedSprite && (isEditTabOpen && tappedSprite.sprite_name === operableSprite)) {
-                this.selectedSprite = tappedSprite;
-                this.isTouching = true;
-                this.lastTouch = touch;
-            } else {
-                this.selectedSprite = null;
-            }
+        const touch = event.touches ? event.touches[0] : event;
+        const tappedSprite = this.getSpriteAtPosition(touch.clientX, touch.clientY);
+        const operableSprite = CopilotLS.getStorage({ target: 'operable_sprite', key: 'operable_sprite' });
+        if (tappedSprite && (isEditTabOpen && tappedSprite.sprite_name === operableSprite)) {
+            this.selectedSprite = tappedSprite;
+            this.isTouching = true;
+            this.lastTouch = touch;
+        } else {
+            this.selectedSprite = null;
         }
+
     }
 
     handleTouchMove(event) {
         event.preventDefault();
-        if(!this.isTouching || !this.selectedSprite){
+        if (!this.selectedSprite) {
             return;
         }
         if (isMobile) {
@@ -405,28 +404,28 @@ class SpriteManager {
                 this.redrawSprites();
             }
         }
-        else {
-            if(!this.lastTouch){
-                return;
-            }
-            const touch = event.touches ? event.touches[0] : event;
-            const deltaX = touch.clientX - this.lastTouch.clientX;
-            const deltaY = touch.clientY - this.lastTouch.clientY;
 
-            const spriteConfig = CopilotLS.getStorage({ target: 'sprites_config', key: this.selectedSprite.sprite_name }) || {};
-            spriteConfig.X = (spriteConfig.X || 0) + deltaX;
-            spriteConfig.Y = (spriteConfig.Y || 0) + deltaY;
-            CopilotLS.setStorage({ target: 'sprites_config', key: this.selectedSprite.sprite_name, value: spriteConfig });
-
-            this.selectedSprite.x = spriteConfig.X;
-            this.selectedSprite.y = spriteConfig.Y;
-
-            this.redrawSprites();
-
+        const touch = event.touches ? event.touches[0] : event;
+        if (!this.lastTouch) {
             this.lastTouch = touch;
-
-
         }
+
+        const deltaX = touch.clientX - this.lastTouch.clientX;
+        const deltaY = touch.clientY - this.lastTouch.clientY;
+
+        const spriteConfig = CopilotLS.getStorage({ target: 'sprites_config', key: this.selectedSprite.sprite_name }) || {};
+        spriteConfig.X = (spriteConfig.X || 0) + deltaX;
+        spriteConfig.Y = (spriteConfig.Y || 0) + deltaY;
+        CopilotLS.setStorage({ target: 'sprites_config', key: this.selectedSprite.sprite_name, value: spriteConfig });
+
+        this.selectedSprite.x = spriteConfig.X;
+        this.selectedSprite.y = spriteConfig.Y;
+
+        this.redrawSprites();
+
+        this.lastTouch = touch;
+
+
     }
 
     handleTouchEnd() {
