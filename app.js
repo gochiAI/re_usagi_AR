@@ -74,10 +74,7 @@ class SetCanvasAndVideo {
         this.CONSTRAINTS = {
             audio: false,
             video: {
-                width: { ideal: this.video.width },
-                height: { ideal: this.video.height },
-                aspectRatio: { ideal: 16 / 9 },
-                facingMode: "user"
+                facingMode: "environment"
             }
         };
         document.getElementById('main').appendChild(this.video);
@@ -87,7 +84,7 @@ class SetCanvasAndVideo {
 class VideoStream extends SetCanvasAndVideo {
     constructor() {
         super();
-        this.isFront = true;
+        this.isFront = false;
         this.curStream = null;
 
         this.initCamera();
@@ -95,11 +92,12 @@ class VideoStream extends SetCanvasAndVideo {
     }
 
     syncCamera() {
-        this.CONSTRAINTS.video.facingMode = this.isFront ? "user" : { exact: "environment" };
+        this.CONSTRAINTS.video.facingMode = this.isFront ? "environment" : "user";
         if (this.curStream) {
             this.curStream.getVideoTracks().forEach(track => track.stop());
         }
     }
+
 
     async initCamera() {
         try {
@@ -111,6 +109,7 @@ class VideoStream extends SetCanvasAndVideo {
         }
     }
 }
+
 
 
 class GetSrc extends CopilotLS {
@@ -356,7 +355,7 @@ class SpriteManager {
         event.preventDefault();
         const isEditTabOpen = document.getElementById('SpriteEditTab').style.display === 'flex';
         if (isMobile) {
-            if (event.touches.length === 2 && isEditTabOpen) {
+            if (event.touches?.length === 2 && isEditTabOpen) {
                 const touch1 = event.touches[0];
                 const touch2 = event.touches[1];
                 this.initialDistance = this.getDistance(touch1, touch2);
@@ -387,7 +386,7 @@ class SpriteManager {
             return;
         }
         if (isMobile) {
-            if (event.touches.length === 2 && this.selectedSprite) {
+            if (event.touches?.length === 2 && this.selectedSprite) {
                 const touch1 = event.touches[0];
                 const touch2 = event.touches[1];
                 const currentDistance = this.getDistance(touch1, touch2);
@@ -639,11 +638,11 @@ function toggleCamera() {
 // Capture and display image
 function captureAndDisplayImage() {
     const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = s_cAv.canvas.width;
-    tempCanvas.height = s_cAv.canvas.height;
+    tempCanvas.width = m_video.canvas.width;
+    tempCanvas.height = m_video.canvas.height;
     const tempCtx = tempCanvas.getContext('2d');
-    tempCtx.drawImage(s_cAv.video, 0, 0, s_cAv.canvas.width, s_cAv.canvas.height);
-    tempCtx.drawImage(s_cAv.canvas, 0, 0, s_cAv.canvas.width, s_cAv.canvas.height);
+    tempCtx.drawImage(m_video.video, 0, 0, m_video.canvas.width, m_video.canvas.height);
+    tempCtx.drawImage(m_video.canvas, 0, 0, m_video.canvas.width, m_video.canvas.height);
     const img = new Image();
     img.src = tempCanvas.toDataURL("image/png");
     CopilotLS.setStorage({ target: 'captured_image', key: 'captured_image', value: img.src });
